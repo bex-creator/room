@@ -450,15 +450,19 @@
         botsToAnswer.forEach(async (bot) => {
           try {
              // Formulate a prompt for the Pollinations AI text model
-             const promptToAsk = `You are playing a party game like Cards Against Humanity or Quiplash. The prompt is: "${state.currentPrompt}". Give a short, funny, clever, and surprising answer in 10 words or less. Reply ONLY with the answer text itself, no intro, no quotes, no hashtags.`;
+             const systemPrompt = "You are a witty party game player. Provide a short, funny answer. DO NOT include any thoughts, reasoning, or word counts. Output strictly the final answer text.";
+             const promptToAsk = `Prompt: "${state.currentPrompt}"`;
              
-             // Fetch from Pollinations AI (returns plain text)
-             const response = await fetch('https://text.pollinations.ai/' + encodeURIComponent(promptToAsk));
-             const text = await response.text();
+             // Fetch from Pollinations AI using system instructions and a specific model to prevent monologues
+             const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptToAsk)}?system=${encodeURIComponent(systemPrompt)}&model=openai`);
+             let text = await response.text();
+
+             // Clean up any rogue quotes, escaped newlines, or asterisks that the AI might sneak in
+             text = text.replace(/^["']|["']$/g, '').replace(/\\n/g, ' ').replace(/\n/g, ' ').trim();
 
              // Add a random delay so they don't all answer simultaneously
              setTimeout(() => {
-               handleClientMessage(bot.id, { type: 'SUBMIT_ANSWER', answerText: text.trim() });
+               handleClientMessage(bot.id, { type: 'SUBMIT_ANSWER', answerText: text });
              }, 1500 + Math.random() * 4000);
 
           } catch (e) {
