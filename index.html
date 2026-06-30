@@ -449,12 +449,17 @@
         
         botsToAnswer.forEach(async (bot) => {
           try {
+             // Give each bot a unique personality and a random seed so they never say the exact same thing
+             const personas = ["sarcastic", "goofy", "overly dramatic", "deadpan", "bizarre", "passive-aggressive", "overly enthusiastic", "cynical"];
+             const randomPersona = personas[Math.floor(Math.random() * personas.length)];
+             const seed = Math.floor(Math.random() * 1000000);
+
              // Formulate a prompt for the Pollinations AI text model
-             const systemPrompt = "You are a witty party game player. Provide a short, funny answer. DO NOT include any thoughts, reasoning, or word counts. Output strictly the final answer text.";
+             const systemPrompt = `You are a ${randomPersona} party game player named ${bot.name}. Provide a short, funny answer. DO NOT include any thoughts, reasoning, or word counts. Output strictly the final answer text.`;
              const promptToAsk = `Prompt: "${state.currentPrompt}"`;
              
-             // Fetch from Pollinations AI using system instructions and a specific model to prevent monologues
-             const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptToAsk)}?system=${encodeURIComponent(systemPrompt)}&model=openai`);
+             // Fetch from Pollinations AI using system instructions, a specific model, and a unique random seed
+             const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptToAsk)}?system=${encodeURIComponent(systemPrompt)}&model=openai&seed=${seed}`);
              let text = await response.text();
 
              // Clean up any rogue quotes, escaped newlines, or asterisks that the AI might sneak in
@@ -476,10 +481,45 @@
 
       // Bot picks a winner
       if (state.phase === 'judging' && currentJudge?.isBot) {
-         setTimeout(() => {
+         setTimeout(async () => {
+            const answerEntries = Object.entries(state.answers);
             const answerIds = Object.keys(state.answers);
-            const randomWinner = answerIds[Math.floor(Math.random() * answerIds.length)];
-            handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: randomWinner });
+            
+            if (answerEntries.length === 0) return;
+
+            try {
+               // Build the list of options for the AI
+               let optionsText = "";
+               answerEntries.forEach((entry, idx) => {
+                  optionsText += `Option ${idx + 1}: ${entry[1]}\n`;
+               });
+
+               const systemPrompt = "You are a judge in a comedy party game. Read the prompt and the options. Pick the funniest and most clever option. Respond ONLY with the single number of the winning option (e.g., '1' or '2'). Do not write any other text.";
+               const promptToAsk = `Prompt: "${state.currentPrompt}"\n\nOptions:\n${optionsText}`;
+               
+               const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptToAsk)}?system=${encodeURIComponent(systemPrompt)}&model=openai`);
+               let text = await response.text();
+               
+               // Extract the chosen number
+               const match = text.match(/\d+/);
+               let winnerIndex = -1;
+               if (match) {
+                  const num = parseInt(match[0], 10);
+                  if (num >= 1 && num <= answerEntries.length) {
+                     winnerIndex = num - 1;
+                  }
+               }
+
+               // Use the AI's choice, or fallback to random if parsing fails
+               const winningId = winnerIndex !== -1 ? answerEntries[winnerIndex][0] : answerIds[Math.floor(Math.random() * answerIds.length)];
+               
+               handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: winningId });
+
+            } catch (e) {
+               console.error("Bot judging failed, falling back to random:", e);
+               const randomWinner = answerIds[Math.floor(Math.random() * answerIds.length)];
+               handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: randomWinner });
+            }
          }, 4000); // 4s delay to "read" the answers
       }
     }
