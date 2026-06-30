@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompted! (WebRTC P2P)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PeerJS for WebRTC P2P connections -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 selection:bg-indigo-200 min-h-screen">
+
+  <!-- ERROR / TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-[100]">
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <p id="loading-text" class="text-gray-500 font-bold">Connecting via WebRTC...</p>
+    </div>
+  </div>
+
+  <!-- HOME VIEW (Join/Create) -->
+  <div id="home-view" class="flex flex-col items-center justify-center min-h-[80vh] px-4 pt-10">
+    <div class="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
+      <div class="bg-indigo-600 p-8 text-center">
+        <svg class="w-16 h-16 text-white mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <h1 class="text-4xl font-black text-white tracking-tight">Prompted!</h1>
+        <p class="text-indigo-200 mt-2 font-medium">WebRTC Peer-to-Peer</p>
+      </div>
+      
+      <div class="p-8 space-y-6">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Your Name</label>
+          <input type="text" id="player-name" placeholder="e.g. Hilarious Harry" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-indigo-500 transition-colors">
+        </div>
+
+        <div class="pt-4 space-y-3">
+          <button onclick="createGame()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95">
+            Create Game (Host)
+          </button>
+          
+          <div class="relative flex items-center py-2">
+            <div class="flex-grow border-t border-gray-200"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 font-medium text-sm">OR</span>
+            <div class="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="join-code" placeholder="Room Code" maxlength="5" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-mono uppercase focus:outline-none focus:border-indigo-500 text-center">
+            <button onclick="joinGame()" class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl transition-transform active:scale-95 whitespace-nowrap">
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME VIEW -->
+  <div id="game-view" class="hidden min-h-screen bg-gray-50 pb-20">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <h1 class="text-xl font-black text-gray-900 tracking-tight hidden sm:block">Prompted!</h1>
+      </div>
+      
+      <div class="flex gap-3">
+        <div class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-lg text-sm font-bold tracking-wide flex items-center gap-2">
+          ROOM: <span id="display-room-code" class="font-mono text-lg"></span>
+        </div>
+        <div class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-bold tracking-wide flex items-center gap-2">
+          RND <span id="round-display">1</span>
+        </div>
+      </div>
+
+      <button onclick="leaveGame()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition-colors flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+      </button>
+    </header>
+
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 p-4 md:p-8">
+      
+      <!-- Sidebar / Scoreboard -->
+      <aside id="sidebar" class="hidden w-full md:w-64 flex-shrink-0 order-2 md:order-1">
+        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm sticky top-24">
+          <h3 class="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">Scoreboard</h3>
+          <div id="scoreboard-list" class="space-y-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Play Area -->
+      <main class="flex-grow order-1 md:order-2 min-h-[60vh] flex flex-col justify-center">
+        
+        <!-- PHASE: LOBBY -->
+        <div id="phase-lobby" class="hidden max-w-2xl mx-auto space-y-6 w-full text-center">
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="text-3xl font-black text-gray-900 mb-2">Waiting for players...</h2>
+            <p class="text-gray-500 mb-6">Tell your friends to join using this code:</p>
+            
+            <div class="inline-flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-6 mb-8 w-full sm:w-auto">
+              <span id="lobby-room-code" class="text-6xl font-mono font-black text-indigo-700 tracking-widest"></span>
+            </div>
+
+            <div id="lobby-players-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-left mb-8">
+              <!-- Populated by JS -->
+            </div>
+
+            <div id="host-controls" class="hidden mt-6">
+              <button onclick="dispatchAction({type: 'START_GAME'})" id="btn-start-game" disabled class="w-full sm:w-auto min-w-[200px] bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black py-4 px-8 rounded-2xl text-xl flex items-center justify-center gap-2 mx-auto transition-transform active:scale-95">
+                Start Game
+              </button>
+              <p id="lobby-waiting-msg" class="text-sm text-gray-400 mt-3 font-medium">Need at least 3 players to start</p>
+            </div>
+            <p id="client-waiting-msg" class="text-gray-500 font-bold animate-pulse hidden">Waiting for host to start...</p>
+          </div>
+        </div>
+
+        <!-- PHASE: PICKING -->
+        <div id="phase-picking" class="hidden max-w-3xl mx-auto space-y-6 w-full">
+          <!-- View for the Judge -->
+          <div id="picking-judge-view" class="hidden bg-white rounded-3xl p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-6 text-indigo-600">
+              <span class="text-4xl">👑</span>
+              <h2 class="text-3xl font-black">You are the Judge!</h2>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-6">Choose a prompt for the group:</h3>
+            
+            <div id="prompt-options" class="space-y-3 mb-8">
+              <!-- Populated by JS -->
+            </div>
+
+            <div class="relative flex items-center py-4">
+              <div class="flex-grow border-t border-gray-200"></div>
+              <span class="flex-shrink-0 mx-4 text-gray-400 font-bold text-sm uppercase tracking-wider">Or write your own</span>
+              <div class="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+              <input type="text" id="custom-prompt-input" placeholder="Type a custom prompt here..." class="flex-grow bg-gray-50 border-2 border-gray-200 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-indigo-500">
+              <button onclick="useCustomPrompt()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-transform active:scale-95 whitespace-nowrap">
+                Use Custom
+              </button>
+            </div>
+          </div>
+
+          <!-- View for regular players -->
+          <div id="picking-player-view" class="hidden mt-10 text-center space-y-6">
+            <div class="text-6xl mb-4 animate-bounce">👑</div>
+            <h2 class="text-3xl font-black text-gray-800">
+              <span id="picking-judge-name" class="text-indigo-600">Someone</span> is picking a prompt...
+            </h2>
+            <p class="text-gray-500 text-lg">Get your creative juices flowing.</p>
+          </div>
+        </div>
+
+        <!-- PHASE: ANSWERING -->
+        <div id="phase-answering" class="hidden max-w-3xl mx-auto space-y-6 w-full">
+          <div class="bg-indigo-600 rounded-3xl p-8 sm:p-12 shadow-lg text-center transform -rotate-1">
+            <h2 id="answering-prompt-text" class="text-3xl sm:text-4xl font-black text-white leading-tight"></h2>
+          </div>
+
+          <!-- Judge waiting view -->
+          <div id="answering-judge-view" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
+            <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Waiting for answers...</h3>
+            <p id="answering-judge-status" class="text-gray-500 text-lg"></p>
+          </div>
+
+          <!-- Player answer view -->
+          <div id="answering-player-view" class="hidden bg-white rounded-3xl p-8 shadow-sm">
+            <label class="block text-xl font-bold text-gray-800 mb-4">Your Answer:</label>
+            <textarea id="my-answer-input" placeholder="Make it hilarious..." rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-4 text-xl focus:outline-none focus:border-indigo-500 resize-none mb-4"></textarea>
+            <button onclick="submitAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl text-xl transition-transform active:scale-95">
+              Lock it in!
+            </button>
+          </div>
+
+          <!-- Player done view -->
+          <div id="answering-done-view" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
+            <div class="text-6xl text-green-500 mb-4">✓</div>
+            <h3 class="text-2xl font-bold text-gray-800">Answer locked in!</h3>
+            <p id="answering-done-status" class="text-gray-500 mt-2 font-medium"></p>
+          </div>
+        </div>
+
+        <!-- PHASE: JUDGING -->
+        <div id="phase-judging" class="hidden max-w-4xl mx-auto space-y-8 w-full">
+          <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-500 uppercase tracking-widest text-sm">The Prompt</h2>
+            <h3 id="judging-prompt-text" class="text-3xl font-black text-gray-900"></h3>
+          </div>
+
+          <div class="bg-gray-100 rounded-3xl p-6 sm:p-8">
+            <div class="flex items-center justify-center gap-3 mb-8">
+              <span class="text-3xl">👑</span>
+              <h4 id="judging-header-text" class="text-2xl font-bold text-gray-800"></h4>
+            </div>
+
+            <div id="judging-answers-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- PHASE: RESULTS -->
+        <div id="phase-results" class="hidden max-w-3xl mx-auto text-center space-y-8 w-full">
+          <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500"></div>
+            <div class="text-6xl mb-6">🏆</div>
+            <h2 class="text-xl font-bold text-gray-500 mb-2 uppercase tracking-wide">Winner!</h2>
+            <h3 id="results-winner-name" class="text-4xl font-black text-gray-900 mb-8"></h3>
+            
+            <div class="bg-gray-50 rounded-2xl p-6 sm:p-8 relative inline-block text-left w-full border border-gray-100 shadow-inner">
+              <p class="text-sm font-bold text-indigo-600 mb-3 uppercase tracking-wider">The Prompt:</p>
+              <p id="results-prompt-text" class="text-xl text-gray-600 mb-6 italic"></p>
+              
+              <p class="text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Winning Answer:</p>
+              <p id="results-winning-answer" class="text-3xl font-black text-gray-900 leading-tight"></p>
+            </div>
+          </div>
+
+          <div id="results-host-controls" class="hidden">
+            <button onclick="dispatchAction({type: 'NEXT_ROUND'})" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-10 rounded-2xl text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
+              Start Next Round
+            </button>
+          </div>
+          <p id="results-waiting-msg" class="hidden text-xl font-bold text-gray-500 animate-pulse">Waiting for host to start next round...</p>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // --- CONSTANTS ---
+    const APP_PREFIX = "prompted-v1-"; // Prevent collision on PeerJS server
+    const SAMPLE_PROMPTS = [
+      "The worst thing to bring to a job interview is...",
+      "What's the real reason aliens haven't visited us?",
+      "A bad name for a pet dog.",
+      "What's my secret talent?",
+      "The title of my autobiography would be...",
+      "A new Olympic sport that should exist.",
+      "The worst text message to receive at 3 AM.",
+      "What is the secret ingredient in the school cafeteria's mystery meat?",
+      "The worst theme for a children's birthday party.",
+      "A rejected flavor of ice cream.",
+      "The worst thing to hear during surgery.",
+      "What not to say to a police officer when pulled over."
+    ];
+
+    // --- SHARED STATE ---
+    // The Host is the source of truth for this state object.
+    let state = {
+      players: [],        // { id, name, score }
+      judgeIndex: 0,
+      currentPrompt: '',
+      answers: {},        // { peerId: text }
+      winnerId: '',
+      phase: 'lobby',     // lobby, picking, answering, judging, results
+      roundNumber: 1
+    };
+
+    // --- LOCAL CLIENT VARIABLES ---
+    let myPeer = null;
+    let myId = null;
+    let myName = '';
+    let isHost = false;
+    let roomCode = '';
+    
+    // Connections
+    let hostConnection = null; // Only populated if client
+    let clientConnections = {}; // Only populated if host { peerId: DataConnection }
+
+    // --- DOM HELPERS ---
+    const el = id => document.getElementById(id);
+    const show = id => el(id).classList.remove('hidden');
+    const hide = id => el(id).classList.add('hidden');
+    
+    function showToast(msg) {
+      const toast = el('toast');
+      toast.textContent = msg;
+      toast.style.opacity = 1;
+      setTimeout(() => toast.style.opacity = 0, 4000);
+    }
+
+    function showLoading(text) {
+      el('loading-text').textContent = text;
+      show('loading-overlay');
+    }
+    
+    function hideLoading() {
+      hide('loading-overlay');
+    }
+
+    // --- NETWORKING (PEERJS) ---
+
+    // 1. HOST LOGIC
+    function createGame() {
+      const name = el('player-name').value.trim();
+      if (!name) return showToast("Please enter your name.");
+      myName = name;
+      isHost = true;
+      
+      showLoading("Creating Room...");
+      roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const fullPeerId = APP_PREFIX + roomCode;
+
+      myPeer = new Peer(fullPeerId);
+
+      myPeer.on('open', (id) => {
+        myId = id;
+        hideLoading();
+        hide('home-view');
+        show('game-view');
+        
+        // Host adds themselves to the game
+        state.players.push({ id: myId, name: myName, score: 0 });
+        render();
+      });
+
+      myPeer.on('connection', (conn) => {
+        conn.on('open', () => {
+          clientConnections[conn.peer] = conn;
+        });
+
+        conn.on('data', (data) => {
+          handleClientMessage(conn.peer, data);
+        });
+
+        conn.on('close', () => {
+          // Remove player on disconnect
+          state.players = state.players.filter(p => p.id !== conn.peer);
+          delete clientConnections[conn.peer];
+          delete state.answers[conn.peer]; // Remove their answer if any
+          
+          checkAutoAdvance(); // Check if we were waiting for them
+          broadcastState();
+        });
+      });
+
+      myPeer.on('error', (err) => {
+        hideLoading();
+        showToast("Error creating room: " + err.type);
+      });
+    }
+
+    // 2. CLIENT LOGIC
+    function joinGame() {
+      const name = el('player-name').value.trim();
+      roomCode = el('join-code').value.trim().toUpperCase();
+      
+      if (!name) return showToast("Please enter your name.");
+      if (!roomCode) return showToast("Please enter a room code.");
+      
+      myName = name;
+      isHost = false;
+      
+      showLoading("Connecting to Host...");
+      myPeer = new Peer(); // Let PeerJS assign a random ID
+
+      myPeer.on('open', (id) => {
+        myId = id;
+        const hostPeerId = APP_PREFIX + roomCode;
+        
+        hostConnection = myPeer.connect(hostPeerId, { reliable: true });
+
+        hostConnection.on('open', () => {
+          hideLoading();
+          hide('home-view');
+          show('game-view');
+          
+          // Tell host we joined
+          hostConnection.send({ type: 'JOIN', name: myName });
+        });
+
+        hostConnection.on('data', (data) => {
+          if (data.type === 'STATE_UPDATE') {
+            state = data.state;
+            render();
+          }
+        });
+
+        hostConnection.on('close', () => {
+          showToast("Host disconnected. Game over.");
+          leaveGame();
+        });
+      });
+
+      myPeer.on('error', (err) => {
+        hideLoading();
+        showToast("Connection Error. Ensure room code is correct.");
+        if (myPeer) myPeer.destroy();
+      });
+    }
+
+    function leaveGame() {
+      if (myPeer) myPeer.destroy();
+      state.players = [];
+      state.answers = {};
+      clientConnections = {};
+      hostConnection = null;
+      hide('game-view');
+      show('home-view');
+    }
+
+    // --- GAME LOGIC (HOST AUTHORITATIVE) ---
+    // All game actions go through this function on the HOST
+    function handleClientMessage(senderPeerId, action) {
+      if (!isHost) return;
+
+      switch(action.type) {
+        case 'JOIN':
+          if (!state.players.find(p => p.id === senderPeerId)) {
+            state.players.push({ id: senderPeerId, name: action.name, score: 0 });
+          }
+          break;
+        case 'START_GAME':
+          state.phase = 'picking';
+          state.roundNumber = 1;
+          state.judgeIndex = 0;
+          break;
+        case 'SUBMIT_PROMPT':
+          state.currentPrompt = action.promptText;
+          state.answers = {};
+          state.phase = 'answering';
+          break;
+        case 'SUBMIT_ANSWER':
+          state.answers[senderPeerId] = action.answerText;
+          checkAutoAdvance();
+          break;
+        case 'PICK_WINNER':
+          state.winnerId = action.winnerId;
+          const winner = state.players.find(p => p.id === action.winnerId);
+          if (winner) winner.score++;
+          state.phase = 'results';
+          break;
+        case 'NEXT_ROUND':
+          state.roundNumber++;
+          state.judgeIndex = (state.judgeIndex + 1) % state.players.length;
+          state.currentPrompt = '';
+          state.answers = {};
+          state.winnerId = '';
+          state.phase = 'picking';
+          break;
+      }
+      broadcastState();
+    }
+
+    function checkAutoAdvance() {
+      if (state.phase !== 'answering') return;
+      
+      const numAnswers = Object.keys(state.answers).length;
+      // Everyone except the judge needs to answer
+      const expectedAnswers = state.players.length - 1; 
+
+      if (numAnswers > 0 && numAnswers >= expectedAnswers) {
+        state.phase = 'judging';
+      }
+    }
+
+    function broadcastState() {
+      if (!isHost) return;
+      // Host updates its own UI directly
+      render();
+      // Broadcast to all connected clients
+      Object.values(clientConnections).forEach(conn => {
+        if (conn.open) {
+          conn.send({ type: 'STATE_UPDATE', state: state });
+        }
+      });
+    }
+
+    // --- ACTION DISPATCHER ---
+    // Both Host UI and Client UI use this to trigger actions
+    function dispatchAction(action) {
+      if (isHost) {
+        handleClientMessage(myId, action);
+      } else {
+        if (hostConnection && hostConnection.open) {
+          hostConnection.send(action);
+        }
+      }
+    }
+
+    // Component wrappers for dispatch
+    function submitSpecificPrompt(promptText) {
+      dispatchAction({ type: 'SUBMIT_PROMPT', promptText });
+    }
+    
+    function useCustomPrompt() {
+      const text = el('custom-prompt-input').value.trim();
+      if (text) submitSpecificPrompt(text);
+    }
+    
+    function submitAnswer() {
+      const text = el('my-answer-input').value.trim();
+      if (text) {
+        dispatchAction({ type: 'SUBMIT_ANSWER', answerText: text });
+        el('my-answer-input').value = '';
+      }
+    }
+    
+    function pickWinner(winningPeerId) {
+      dispatchAction({ type: 'PICK_WINNER', winnerId: winningPeerId });
+    }
+
+    // --- RENDER LOGIC ---
+    function render() {
+      // 1. Common Header & Sidebar UI
+      el('display-room-code').textContent = roomCode;
+      el('round-display').textContent = state.roundNumber;
+      
+      const currentJudge = state.players[state.judgeIndex];
+      const amIJudge = currentJudge?.id === myId;
+
+      if (state.phase !== 'lobby') {
+        show('sidebar');
+        const sortedPlayers = [...state.players].sort((a, b) => b.score - a.score);
+        
+        el('scoreboard-list').innerHTML = sortedPlayers.map(p => {
+          const isThisJudge = p.id === currentJudge?.id;
+          const hasAnswered = state.answers[p.id] !== undefined;
+          let checkIcon = (state.phase === 'answering' && !isThisJudge && hasAnswered) 
+            ? '<span class="text-green-500 font-bold">✓</span>' : '';
+            
+          return `
+            <div class="flex items-center justify-between p-3 rounded-xl ${isThisJudge ? 'bg-indigo-50 border border-indigo-100' : 'bg-gray-50'}">
+              <div class="flex items-center gap-2 truncate">
+                <span>${isThisJudge ? '👑' : ''}</span>
+                <span class="font-bold text-gray-700 truncate">${p.name} ${p.id === myId ? '(You)' : ''}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                ${checkIcon}
+                <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-black shadow-sm">${p.score}</span>
+              </div>
+            </div>`;
+        }).join('');
+      } else {
+        hide('sidebar');
+      }
+
+      // Hide all phases
+      ['phase-lobby', 'phase-picking', 'phase-answering', 'phase-judging', 'phase-results'].forEach(hide);
+
+      // 2. Phase-Specific Rendering
+      if (state.phase === 'lobby') {
+        show('phase-lobby');
+        el('lobby-room-code').textContent = roomCode;
+        
+        el('lobby-players-grid').innerHTML = state.players.map(p => `
+          <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-2 border border-gray-100">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl">
+              ${p.name.charAt(0).toUpperCase()}
+            </div>
+            <span class="font-semibold text-gray-700 text-center w-full truncate">${p.name}</span>
+          </div>
+        `).join('');
+
+        if (isHost) {
+          show('host-controls');
+          hide('client-waiting-msg');
+          const canStart = state.players.length >= 3;
+          el('btn-start-game').disabled = !canStart;
+          el('lobby-waiting-msg').style.display = canStart ? 'none' : 'block';
+        } else {
+          hide('host-controls');
+          show('client-waiting-msg');
+        }
+      } 
+      
+      else if (state.phase === 'picking') {
+        show('phase-picking');
+        
+        if (amIJudge) {
+          show('picking-judge-view');
+          hide('picking-player-view');
+          
+          // Deterministic random options based on round number so it doesn't flicker on re-render
+          let pool = [...SAMPLE_PROMPTS];
+          let chosen = [];
+          // Simple seeded shuffle
+          for(let i = 0; i < 3; i++) {
+             let idx = (state.roundNumber * 7 + i * 13) % pool.length;
+             chosen.push(pool.splice(idx, 1)[0]);
+          }
+
+          el('prompt-options').innerHTML = chosen.map(prompt => `
+            <button onclick="submitSpecificPrompt('${prompt.replace(/'/g, "\\'")}')" class="w-full text-left bg-gray-50 hover:bg-indigo-50 border-2 border-gray-100 hover:border-indigo-200 p-5 rounded-2xl text-lg font-medium text-gray-700 transition-colors shadow-sm">
+              ${prompt}
+            </button>
+          `).join('');
+          
+        } else {
+          hide('picking-judge-view');
+          show('picking-player-view');
+          el('picking-judge-name').textContent = currentJudge?.name || 'The Judge';
+        }
+      }
+
+      else if (state.phase === 'answering') {
+        show('phase-answering');
+        el('answering-prompt-text').textContent = `"${state.currentPrompt}"`;
+        
+        const numAnswers = Object.keys(state.answers).length;
+        const expected = state.players.length - 1;
+
+        if (amIJudge) {
+          show('answering-judge-view');
+          hide('answering-player-view');
+          hide('answering-done-view');
+          el('answering-judge-status').textContent = `${numAnswers} out of ${expected} players have answered.`;
+        } else {
+          hide('answering-judge-view');
+          if (state.answers[myId]) {
+            // I have answered
+            hide('answering-player-view');
+            show('answering-done-view');
+            el('answering-done-status').textContent = `Waiting for others... (${numAnswers}/${expected})`;
+          } else {
+            // Need to answer
+            show('answering-player-view');
+            hide('answering-done-view');
+            setTimeout(() => el('my-answer-input').focus(), 50);
+          }
+        }
+      }
+
+      else if (state.phase === 'judging') {
+        show('phase-judging');
+        el('judging-prompt-text').textContent = `"${state.currentPrompt}"`;
+        el('judging-header-text').textContent = amIJudge ? "Pick your favorite answer!" : `${currentJudge?.name} is deciding...`;
+
+        // Render answers alphabetically to prevent positional bias
+        const answersList = Object.entries(state.answers)
+          .map(([peerId, text]) => ({ peerId, text }))
+          .sort((a, b) => a.text.localeCompare(b.text));
+
+        el('judging-answers-grid').innerHTML = answersList.map(ans => `
+          <button 
+            ${amIJudge ? `onclick="pickWinner('${ans.peerId}')"` : 'disabled'} 
+            class="text-left bg-white p-6 rounded-2xl border-2 ${amIJudge ? 'border-transparent hover:border-indigo-400 hover:shadow-md cursor-pointer active:scale-95' : 'border-gray-200 cursor-default'} transition-all relative group shadow-sm"
+          >
+            <p class="text-2xl font-bold text-gray-800">${ans.text}</p>
+            ${amIJudge ? '<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-2xl">🏆</div>' : ''}
+          </button>
+        `).join('');
+      }
+
+      else if (state.phase === 'results') {
+        show('phase-results');
+        const winner = state.players.find(p => p.id === state.winnerId);
+        
+        el('results-winner-name').textContent = winner?.name || 'Unknown Player';
+        el('results-prompt-text').textContent = `"${state.currentPrompt}"`;
+        el('results-winning-answer').textContent = `"${state.answers[state.winnerId] || ''}"`;
+
+        if (isHost) {
+          show('results-host-controls');
+          hide('results-waiting-msg');
+        } else {
+          hide('results-host-controls');
+          show('results-waiting-msg');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
