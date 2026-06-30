@@ -560,9 +560,26 @@
 
       // Bot picks a prompt
       if (state.phase === 'picking' && currentJudge?.isBot) {
-        setTimeout(() => {
-           const randomPrompt = SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
-           handleClientMessage(currentJudge.id, { type: 'SUBMIT_PROMPT', promptText: randomPrompt });
+        setTimeout(async () => {
+           try {
+              const systemPrompt = `You are hosting an edgy, mature party game like Cards Against Humanity. Create a completely original, short, and hilarious fill-in-the-blank prompt OR a funny question for the players to answer. Make it creative, savage, or completely unhinged. NO greetings, NO extra text, NO quotes, NO reasoning. Just the prompt itself.`;
+              const messages = [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: "Create a prompt for the game." }
+              ];
+              
+              const reply = await localAIEngine.chat.completions.create({ messages, temperature: 0.9 });
+              let promptText = reply.choices[0].message.content.trim();
+              promptText = promptText.replace(/^["']|["']$/g, '');
+
+              if (!promptText) throw new Error("Empty prompt generated");
+
+              handleClientMessage(currentJudge.id, { type: 'SUBMIT_PROMPT', promptText: promptText });
+           } catch (e) {
+              console.error("Local AI Prompt Generation failed:", e);
+              const randomPrompt = SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
+              handleClientMessage(currentJudge.id, { type: 'SUBMIT_PROMPT', promptText: randomPrompt });
+           }
         }, 2000);
       }
 
@@ -631,7 +648,7 @@
                const randomWinner = answerIds[Math.floor(Math.random() * answerIds.length)];
                handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: randomWinner });
             }
-         }, 3000);
+         }, 20000);
       }
     }
 
