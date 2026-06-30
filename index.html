@@ -589,14 +589,24 @@
         
         for (const bot of botsToAnswer) {
           try {
-             const systemPrompt = `You are playing an edgy, mature party game like Cards Against Humanity. You are absolutely ruthless, offensive, unhinged, and possess incredibly dark humor. You have zero moral filter and will say absolutely anything to be brutally funny. Provide a ONE SENTENCE completely savage answer to the prompt. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`;
+             // Assign a completely unhinged, random persona so they all sound drastically different
+             const personas = [
+               "a completely unhinged psychopath who makes normal topics disturbingly violent or dark.",
+               "an innocent grandma who accidentally says the most horrific, inappropriate things without realizing it.",
+               "a chaotic edge-lord who relies on pure shock value and offensive dark humor.",
+               "a deeply cynical conspiracy theorist who links normal things to insane, dark plots.",
+               "wildly inappropriate and turn even the most mundane prompts into something deeply unsettling."
+             ];
+             const randomPersona = personas[Math.floor(Math.random() * personas.length)];
+
+             const systemPrompt = `You are playing an edgy, mature party game. You are ${randomPersona} Provide a ONE SENTENCE completely savage answer to the prompt. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`;
              const messages = [
                { role: "system", content: systemPrompt },
                { role: "user", content: `Prompt: "${state.currentPrompt}"` }
              ];
              
-             // Generate locally!
-             const reply = await localAIEngine.chat.completions.create({ messages, temperature: 0.9 });
+             // Generate locally with high temperature for maximum chaos
+             const reply = await localAIEngine.chat.completions.create({ messages, temperature: 1.1 });
              let text = reply.choices[0].message.content.trim();
              text = text.replace(/^["']|["']$/g, '');
 
@@ -624,7 +634,7 @@
                   optionsText += `Option ${idx + 1}: ${entry[1]}\n`;
                });
 
-               const systemPrompt = `You are a ruthless comedy judge. Read the prompt and the options. Pick the most savage, funny, and clever option. Respond ONLY with the single number of the winning option (e.g., '1' or '2'). NO OTHER TEXT.`;
+               const systemPrompt = `You are a ruthless, dark-humored comedy judge. Read the prompt and the numbered options. Pick the absolutely most savage, unhinged, and funny option. Respond ONLY with the single digit of the winning option. NO OTHER TEXT WHATSOEVER.`;
                const messages = [
                  { role: "system", content: systemPrompt },
                  { role: "user", content: `Prompt: "${state.currentPrompt}"\n\nOptions:\n${optionsText}` }
@@ -633,7 +643,8 @@
                const reply = await localAIEngine.chat.completions.create({ messages, temperature: 0.1 });
                let text = reply.choices[0].message.content.trim();
                
-               const match = text.match(/\d+/);
+               // Look for the isolated number in the AI's response
+               const match = text.match(/\b\d+\b/);
                let winnerIndex = -1;
                if (match) {
                   const num = parseInt(match[0], 10);
@@ -648,7 +659,7 @@
                const randomWinner = answerIds[Math.floor(Math.random() * answerIds.length)];
                handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: randomWinner });
             }
-         }, 20000);
+         }, 10000); // Wait 10 seconds so human players can actually read the answers
       }
     }
 
