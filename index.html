@@ -141,6 +141,10 @@
                   Start Game
                 </button>
               </div>
+              <div class="flex items-center justify-center gap-2 mt-4">
+                <input type="checkbox" id="setting-bot-judges" checked class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                <label for="setting-bot-judges" class="text-sm font-bold text-gray-600 cursor-pointer">Bots take turns as Judge (Make Prompts)</label>
+              </div>
               <p id="lobby-waiting-msg" class="text-sm text-gray-400 mt-3 font-medium">Need at least 2 players to start</p>
             </div>
             <p id="client-waiting-msg" class="text-gray-500 font-bold animate-pulse hidden">Waiting for host to start...</p>
@@ -283,7 +287,8 @@
       answers: {},        
       winnerId: '',
       phase: 'lobby',     
-      roundNumber: 1
+      roundNumber: 1,
+      settings: { allowBotJudges: true }
     };
 
     let myPeer = null;
@@ -435,6 +440,10 @@
 
     el('btn-leave-room').addEventListener('click', leaveGame);
 
+    el('setting-bot-judges').addEventListener('change', (e) => {
+      dispatchAction({ type: 'TOGGLE_BOT_JUDGES', value: e.target.checked });
+    });
+
     function leaveGame() {
       if (myPeer) myPeer.destroy();
       state.players = [];
@@ -511,9 +520,20 @@
           if (winner) winner.score++;
           state.phase = 'results';
           break;
+        case 'TOGGLE_BOT_JUDGES':
+          state.settings.allowBotJudges = action.value;
+          break;
         case 'NEXT_ROUND':
           state.roundNumber++;
-          state.judgeIndex = (state.judgeIndex + 1) % state.players.length;
+          let nextIdx = (state.judgeIndex + 1) % state.players.length;
+          if (!state.settings.allowBotJudges) {
+             let loopCount = 0;
+             while (state.players[nextIdx].isBot && loopCount < state.players.length) {
+                nextIdx = (nextIdx + 1) % state.players.length;
+                loopCount++;
+             }
+          }
+          state.judgeIndex = nextIdx;
           state.currentPrompt = '';
           state.answers = {};
           state.winnerId = '';
@@ -659,7 +679,7 @@
                const randomWinner = answerIds[Math.floor(Math.random() * answerIds.length)];
                handleClientMessage(currentJudge.id, { type: 'PICK_WINNER', winnerId: randomWinner });
             }
-         }, 10000); // Wait 10 seconds so human players can actually read the answers
+         }, 20000); // Wait 20 seconds so human players can actually read the answers
       }
     }
 
@@ -668,6 +688,10 @@
       el('display-room-code').textContent = roomCode;
       el('round-display').textContent = state.roundNumber;
       
+      if (isHost && state.settings) {
+        el('setting-bot-judges').checked = state.settings.allowBotJudges;
+      }
+
       const currentJudge = state.players[state.judgeIndex];
       const amIJudge = currentJudge?.id === myId;
 
