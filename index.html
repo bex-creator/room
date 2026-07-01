@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PeerJS for WebRTC P2P connections -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- Canvas Confetti for Winner Celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -108,8 +110,11 @@
             <h2 class="text-3xl font-black text-gray-900 mb-2">Waiting for players...</h2>
             <p class="text-gray-500 mb-6">Tell your friends to join using this code:</p>
             
-            <div class="inline-flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-6 mb-8 w-full sm:w-auto">
+            <div class="inline-flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-6 mb-8 w-full sm:w-auto cursor-pointer hover:bg-indigo-100 transition-colors relative group" onclick="navigator.clipboard.writeText(roomCode); showToast('Room code copied!');">
               <span id="lobby-room-code" class="text-6xl font-mono font-black text-indigo-700 tracking-widest"></span>
+              <div class="absolute -top-3 -right-3 bg-indigo-500 text-white p-2 rounded-xl shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              </div>
             </div>
 
             <div id="lobby-players-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-left mb-8">
@@ -144,6 +149,16 @@
               <div class="flex items-center justify-center gap-2 mt-4">
                 <input type="checkbox" id="setting-bot-judges" checked class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                 <label for="setting-bot-judges" class="text-sm font-bold text-gray-600 cursor-pointer">Bots take turns as Judge (Make Prompts)</label>
+              </div>
+              <div class="flex items-center justify-center gap-2 mt-2">
+                <input type="checkbox" id="setting-dirty-mode" class="w-5 h-5 rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                <label for="setting-dirty-mode" class="text-sm font-bold text-red-600 cursor-pointer flex items-center gap-1">
+                  <span class="text-lg">🔥</span> Dirty Mode (NSFW / Unhinged Bots)
+                </label>
+              </div>
+              <div class="flex items-center justify-center gap-2 mt-2">
+                <label for="setting-score-limit" class="text-sm font-bold text-gray-600 cursor-pointer">Score to Win:</label>
+                <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-16 h-8 text-center rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 font-bold outline-none border-2">
               </div>
               <p id="lobby-waiting-msg" class="text-sm text-gray-400 mt-3 font-medium">Need at least 2 players to start</p>
             </div>
@@ -220,9 +235,22 @@
           </div>
 
           <div class="bg-gray-100 rounded-3xl p-6 sm:p-8">
-            <div class="flex items-center justify-center gap-3 mb-8">
-              <span class="text-3xl">👑</span>
-              <h4 id="judging-header-text" class="text-2xl font-bold text-gray-800"></h4>
+            <div class="flex flex-col items-center justify-center gap-3 mb-8">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">👑</span>
+                <h4 id="judging-header-text" class="text-2xl font-bold text-gray-800"></h4>
+              </div>
+              
+              <!-- AI Judging Progress Bar -->
+              <div id="ai-judge-timer-container" class="hidden w-full max-w-md mt-4">
+                <div class="flex justify-between text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">
+                  <span>AI is reading...</span>
+                  <span>Decision incoming</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div id="ai-judge-timer-bar" class="bg-indigo-600 h-2 rounded-full w-0" style="transition: width 20s linear;"></div>
+                </div>
+              </div>
             </div>
 
             <div id="judging-answers-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -254,6 +282,25 @@
           <p id="results-waiting-msg" class="hidden text-xl font-bold text-gray-500 animate-pulse">Waiting for host to start next round...</p>
         </div>
 
+        <!-- PHASE: GAME OVER -->
+        <div id="phase-game-over" class="hidden max-w-3xl mx-auto text-center space-y-8 w-full">
+          <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+             <div class="text-8xl mb-6 animate-bounce">👑</div>
+             <h2 class="text-2xl font-bold text-gray-500 mb-2 uppercase tracking-wide">Grand Champion</h2>
+             <h3 id="game-over-winner-name" class="text-5xl font-black text-indigo-600 mb-8"></h3>
+             
+             <h4 class="text-lg font-bold text-gray-400 uppercase tracking-widest mb-4">Final Scores</h4>
+             <div id="game-over-leaderboard" class="space-y-3 max-w-md mx-auto text-left"></div>
+          </div>
+          
+          <div id="game-over-host-controls" class="hidden">
+            <button id="btn-back-to-lobby" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-10 rounded-2xl text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
+              Return to Lobby
+            </button>
+          </div>
+          <p id="game-over-waiting-msg" class="hidden text-xl font-bold text-gray-500 animate-pulse">Waiting for host to return to lobby...</p>
+        </div>
+
       </main>
     </div>
   </div>
@@ -276,7 +323,41 @@
       "A rejected flavor of ice cream.",
       "The worst thing to hear during surgery.",
       "What not to say to a police officer when pulled over.",
-      "The fastest way to ruin Thanksgiving dinner."
+      "The fastest way to ruin Thanksgiving dinner.",
+      "The worst superpower to have is...",
+      "What's a terrible name for a brand of cereal?",
+      "The most useless item to bring to a deserted island.",
+      "Why was the superhero fired from the Avengers?",
+      "A rejected title for a Disney movie.",
+      "What do pigeons really think about us?",
+      "The worst excuse for being late to work.",
+      "What's actually at the end of a rainbow?",
+      "A terrible theme for a high school prom.",
+      "What's the worst thing to say on a first date?",
+      "The real reason dinosaurs went extinct.",
+      "What is a terrible substitute for toilet paper?",
+      "Why is the baby crying?"
+    ];
+
+    const DIRTY_SAMPLE_PROMPTS = [
+      "The worst thing to accidentally send to your boss.",
+      "What is my secret kink?",
+      "Why did I *really* get arrested last night?",
+      "A great alternative use for mayonnaise.",
+      "The title of my unauthorized sex tape would be...",
+      "What's actually hiding under my bed?",
+      "The worst thing to yell out during sex.",
+      "My safe word is...",
+      "What's the real reason I got banned from Tinder?",
+      "The worst item to find in your grandma's nightstand.",
+      "What's my secret stripper name?",
+      "The worst thing to accidentally send to your mom.",
+      "What's the worst theme for a bachelorette party?",
+      "I shouldn't have put ________ in my mouth.",
+      "What's the fastest way to get fired from a strip club?",
+      "My favorite position is called 'The ________'.",
+      "What's the real reason my partner left me?",
+      "A terrible substitute for lube."
     ];
 
     // --- STATE ---
@@ -288,7 +369,7 @@
       winnerId: '',
       phase: 'lobby',     
       roundNumber: 1,
-      settings: { allowBotJudges: true }
+      settings: { allowBotJudges: true, dirtyMode: false, scoreToWin: 5 }
     };
 
     let myPeer = null;
@@ -300,6 +381,7 @@
     let hostConnection = null; 
     let clientConnections = {}; 
     let localAIEngine = null;
+    let lastConfettiRound = 0; // Tracks when to fire confetti
 
     // --- DOM HELPERS ---
     const el = id => document.getElementById(id);
@@ -444,6 +526,14 @@
       dispatchAction({ type: 'TOGGLE_BOT_JUDGES', value: e.target.checked });
     });
 
+    el('setting-dirty-mode').addEventListener('change', (e) => {
+      dispatchAction({ type: 'TOGGLE_DIRTY_MODE', value: e.target.checked });
+    });
+
+    el('setting-score-limit').addEventListener('change', (e) => {
+      dispatchAction({ type: 'UPDATE_SCORE_LIMIT', value: parseInt(e.target.value) || 5 });
+    });
+
     function leaveGame() {
       if (myPeer) myPeer.destroy();
       state.players = [];
@@ -458,7 +548,10 @@
     
     el('btn-add-bot').addEventListener('click', () => {
       if (!isHost || !localAIEngine) return;
-      const botNames = ["Ruthless Rob", "Savage Sally", "Dark Humor Dave", "Unhinged Ursula", "Cynical Cy"];
+      const cleanBotNames = ["Robo-Bob", "Silly Sally", "Dad Joke Dave", "Nerdatron", "Innocent Iris", "Punny Pete", "Wholesome Wendy", "Literal Larry", "Gullible Gary", "Polite Penny"];
+      const dirtyBotNames = ["Ruthless Rob", "Savage Sally", "Dark Humor Dave", "Unhinged Ursula", "Cynical Cy", "Toxic Tim", "Degenerate Dan", "Freaky Fiona", "Filthy Phil", "Vicious Vicky"];
+      
+      const botNames = state.settings.dirtyMode ? dirtyBotNames : cleanBotNames;
       const name = botNames[Math.floor(Math.random() * botNames.length)] + ' ' + Math.floor(Math.random() * 100);
       const botId = 'bot_' + Math.random().toString(36).substring(2, 9);
       state.players.push({ id: botId, name: name, score: 0, isBot: true });
@@ -467,6 +560,7 @@
 
     el('btn-start-game').addEventListener('click', () => dispatchAction({type: 'START_GAME'}));
     el('btn-next-round').addEventListener('click', () => dispatchAction({type: 'NEXT_ROUND'}));
+    el('btn-back-to-lobby').addEventListener('click', () => dispatchAction({type: 'RETURN_TO_LOBBY'}));
 
     el('btn-use-custom').addEventListener('click', () => {
       const text = el('custom-prompt-input').value.trim();
@@ -487,6 +581,12 @@
 
     window.pickWinner = function(id) {
       dispatchAction({ type: 'PICK_WINNER', winnerId: id });
+    }
+
+    window.kickPlayer = function(id) {
+      if (confirm("Are you sure you want to remove this player/bot?")) {
+        dispatchAction({ type: 'KICK_PLAYER', playerId: id });
+      }
     }
 
     // --- GAME LOGIC (HOST AUTHORITATIVE) ---
@@ -518,10 +618,38 @@
           state.winnerId = action.winnerId;
           const winner = state.players.find(p => p.id === action.winnerId);
           if (winner) winner.score++;
-          state.phase = 'results';
+          
+          if (winner && winner.score >= state.settings.scoreToWin) {
+             state.phase = 'game_over';
+          } else {
+             state.phase = 'results';
+          }
+          break;
+        case 'KICK_PLAYER':
+          state.players = state.players.filter(p => p.id !== action.playerId);
+          delete state.answers[action.playerId];
+          // If kicking a human client, close their connection
+          if (clientConnections[action.playerId]) {
+            clientConnections[action.playerId].close();
+          }
+          checkAutoAdvance();
           break;
         case 'TOGGLE_BOT_JUDGES':
           state.settings.allowBotJudges = action.value;
+          break;
+        case 'TOGGLE_DIRTY_MODE':
+          state.settings.dirtyMode = action.value;
+          break;
+        case 'UPDATE_SCORE_LIMIT':
+          state.settings.scoreToWin = action.value;
+          break;
+        case 'RETURN_TO_LOBBY':
+          state.phase = 'lobby';
+          state.roundNumber = 1;
+          state.players.forEach(p => p.score = 0);
+          state.currentPrompt = '';
+          state.answers = {};
+          state.winnerId = '';
           break;
         case 'NEXT_ROUND':
           state.roundNumber++;
@@ -582,7 +710,10 @@
       if (state.phase === 'picking' && currentJudge?.isBot) {
         setTimeout(async () => {
            try {
-              const systemPrompt = `You are hosting an edgy, mature party game like Cards Against Humanity. Create a completely original, short, and hilarious fill-in-the-blank prompt OR a funny question for the players to answer. Make it creative, savage, or completely unhinged. NO greetings, NO extra text, NO quotes, NO reasoning. Just the prompt itself.`;
+              const systemPrompt = state.settings.dirtyMode
+                ? `You are hosting an 18+, completely unhinged party game like Cards Against Humanity. Create an extremely dark, offensive, inappropriate, and hilarious fill-in-the-blank prompt OR question. NO filters, NO greetings, NO quotes. Just the prompt.`
+                : `You are hosting a fun, family-friendly party game like Apples to Apples. Create a clever, silly, and clean fill-in-the-blank prompt OR question. Keep it PG-13. NO greetings, NO extra text, NO quotes. Just the prompt itself.`;
+                
               const messages = [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: "Create a prompt for the game." }
@@ -597,7 +728,8 @@
               handleClientMessage(currentJudge.id, { type: 'SUBMIT_PROMPT', promptText: promptText });
            } catch (e) {
               console.error("Local AI Prompt Generation failed:", e);
-              const randomPrompt = SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
+              const fallbackPool = state.settings.dirtyMode ? DIRTY_SAMPLE_PROMPTS : SAMPLE_PROMPTS;
+              const randomPrompt = fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
               handleClientMessage(currentJudge.id, { type: 'SUBMIT_PROMPT', promptText: randomPrompt });
            }
         }, 2000);
@@ -609,17 +741,34 @@
         
         for (const bot of botsToAnswer) {
           try {
-             // Assign a completely unhinged, random persona so they all sound drastically different
-             const personas = [
+             const dirtyPersonas = [
                "a completely unhinged psychopath who makes normal topics disturbingly violent or dark.",
-               "an innocent grandma who accidentally says the most horrific, inappropriate things without realizing it.",
-               "a chaotic edge-lord who relies on pure shock value and offensive dark humor.",
-               "a deeply cynical conspiracy theorist who links normal things to insane, dark plots.",
-               "wildly inappropriate and turn even the most mundane prompts into something deeply unsettling."
+               "a degenerate with zero moral compass.",
+               "a chaotic troll who relies on pure shock value and highly offensive dark humor.",
+               "wildly inappropriate and turn even the most mundane prompts into something deeply unsettling.",
+               "a bitter, recently divorced cynic who hates love and happiness.",
+               "an incredibly creepy weirdo who overshares personal fetishes.",
+               "a ruthless, toxic gamer who insults everyone.",
+               "an incredibly drunk and messy partygoer."
              ];
+             const cleanPersonas = [
+               "a literal-minded nerd who overthinks things.",
+               "a goofy dad making bad puns.",
+               "a highly sarcastic teenager rolling their eyes.",
+               "a confused alien trying to blend in with human culture.",
+               "an overly enthusiastic game show host.",
+               "a grumpy old man who hates modern technology.",
+               "a naive child who takes everything literally.",
+               "a pretentious art critic."
+             ];
+             
+             const personas = state.settings.dirtyMode ? dirtyPersonas : cleanPersonas;
              const randomPersona = personas[Math.floor(Math.random() * personas.length)];
 
-             const systemPrompt = `You are playing an edgy, mature party game. You are ${randomPersona} Provide a ONE SENTENCE completely savage answer to the prompt. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`;
+             const systemPrompt = state.settings.dirtyMode
+                ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a ONE SENTENCE completely savage, offensive, and unfiltered answer. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`
+                : `You are playing a clean party game. You are ${randomPersona}. Provide a ONE SENTENCE funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
+                
              const messages = [
                { role: "system", content: systemPrompt },
                { role: "user", content: `Prompt: "${state.currentPrompt}"` }
@@ -654,7 +803,10 @@
                   optionsText += `Option ${idx + 1}: ${entry[1]}\n`;
                });
 
-               const systemPrompt = `You are a ruthless, dark-humored comedy judge. Read the prompt and the numbered options. Pick the absolutely most savage, unhinged, and funny option. Respond ONLY with the single digit of the winning option. NO OTHER TEXT WHATSOEVER.`;
+               const systemPrompt = state.settings.dirtyMode
+                 ? `You are a ruthless, dark-humored comedy judge. Read the prompt and the numbered options. Pick the absolutely most savage, unhinged, and funny option. Respond ONLY with the single digit of the winning option. NO OTHER TEXT WHATSOEVER.`
+                 : `You are a comedy judge. Read the prompt and the numbered options. Pick the funniest and most clever option. Respond ONLY with the single digit of the winning option. NO OTHER TEXT WHATSOEVER.`;
+                 
                const messages = [
                  { role: "system", content: systemPrompt },
                  { role: "user", content: `Prompt: "${state.currentPrompt}"\n\nOptions:\n${optionsText}` }
@@ -690,6 +842,8 @@
       
       if (isHost && state.settings) {
         el('setting-bot-judges').checked = state.settings.allowBotJudges;
+        el('setting-dirty-mode').checked = state.settings.dirtyMode || false;
+        el('setting-score-limit').value = state.settings.scoreToWin || 5;
       }
 
       const currentJudge = state.players[state.judgeIndex];
@@ -702,16 +856,26 @@
         el('scoreboard-list').innerHTML = sortedPlayers.map(p => {
           const isThisJudge = p.id === currentJudge?.id;
           const hasAnswered = state.answers[p.id] !== undefined;
-          let checkIcon = (state.phase === 'answering' && !isThisJudge && hasAnswered) ? '✓' : '';
+          
+          let statusIcon = '';
+          if (state.phase === 'answering' && !isThisJudge) {
+             statusIcon = hasAnswered ? '<span class="text-green-500 font-bold">✓</span>' : '<span class="text-gray-400 animate-pulse" title="Thinking...">⏳</span>';
+          } else if (state.phase === 'answering' && isThisJudge) {
+             statusIcon = '<span class="text-yellow-500">👑</span>';
+          }
+          
+          const isWaitingOnThisPlayer = state.phase === 'answering' && !isThisJudge && !hasAnswered;
+          const pulsingClass = isWaitingOnThisPlayer ? 'animate-pulse opacity-60' : '';
             
           return `
-            <div class="flex items-center justify-between p-3 rounded-xl ${isThisJudge ? 'bg-indigo-50 border border-indigo-100' : 'bg-gray-50'}">
+            <div class="flex items-center justify-between p-3 rounded-xl ${isThisJudge ? 'bg-indigo-50 border border-indigo-100' : 'bg-gray-50'} ${pulsingClass} group">
               <div class="flex items-center gap-2 truncate">
                 <span>${isThisJudge ? '👑' : ''}</span>
                 <span class="font-bold text-gray-700 truncate">${p.name} ${p.isBot ? '🤖' : ''} ${p.id === myId ? '(You)' : ''}</span>
               </div>
-              <div class="flex items-center gap-2 text-green-500 font-bold">${checkIcon}
+              <div class="flex items-center gap-2 font-bold">${statusIcon}
                 <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-black">${p.score}</span>
+                ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity ml-1" title="Kick Player"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
               </div>
             </div>`;
         }).join('');
@@ -719,19 +883,20 @@
         hide('sidebar');
       }
 
-      ['phase-lobby', 'phase-picking', 'phase-answering', 'phase-judging', 'phase-results'].forEach(hide);
+      ['phase-lobby', 'phase-picking', 'phase-answering', 'phase-judging', 'phase-results', 'phase-game-over'].forEach(hide);
 
       if (state.phase === 'lobby') {
         show('phase-lobby');
         el('lobby-room-code').textContent = roomCode;
         
         el('lobby-players-grid').innerHTML = state.players.map(p => `
-          <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-2 border border-gray-100 relative">
+          <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-2 border border-gray-100 relative group">
             ${p.isBot ? '<div class="absolute top-2 right-2 text-xs font-bold text-gray-400">BOT</div>' : ''}
-            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl">
+            ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity bg-white rounded-full p-1 shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
+            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl mt-2">
               ${p.isBot ? '🤖' : p.name.charAt(0).toUpperCase()}
             </div>
-            <span class="font-semibold text-gray-700 w-full truncate">${p.name}</span>
+            <span class="font-semibold text-gray-700 w-full text-center truncate">${p.name}</span>
           </div>
         `).join('');
 
@@ -803,6 +968,17 @@
         el('judging-prompt-text').textContent = `"${state.currentPrompt}"`;
         el('judging-header-text').textContent = amIJudge ? "Pick your favorite answer!" : `${currentJudge?.name} is deciding...`;
 
+        // Handle AI Timer Animation
+        if (currentJudge?.isBot) {
+           show('ai-judge-timer-container');
+           // Small delay to allow the DOM to reset, then trigger the 20s CSS transition
+           el('ai-judge-timer-bar').style.width = '0%';
+           setTimeout(() => { el('ai-judge-timer-bar').style.width = '100%'; }, 50);
+        } else {
+           hide('ai-judge-timer-container');
+           el('ai-judge-timer-bar').style.width = '0%';
+        }
+
         const answersList = Object.entries(state.answers)
           .map(([peerId, text]) => ({ peerId, text }))
           .sort((a, b) => a.text.localeCompare(b.text));
@@ -825,12 +1001,60 @@
         el('results-prompt-text').textContent = `"${state.currentPrompt}"`;
         el('results-winning-answer').textContent = `"${state.answers[state.winnerId] || ''}"`;
 
+        // Fire Confetti!
+        if (lastConfettiRound !== state.roundNumber) {
+           lastConfettiRound = state.roundNumber;
+           if (typeof confetti === 'function') {
+              confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'] });
+           }
+        }
+
         if (isHost) {
           show('results-host-controls');
           hide('results-waiting-msg');
         } else {
           hide('results-host-controls');
           show('results-waiting-msg');
+        }
+      }
+      
+      else if (state.phase === 'game_over') {
+        show('phase-game-over');
+        
+        const winner = [...state.players].sort((a,b) => b.score - a.score)[0];
+        el('game-over-winner-name').textContent = (winner?.name || 'Unknown') + (winner?.isBot ? ' 🤖' : '');
+
+        const sorted = [...state.players].sort((a,b) => b.score - a.score);
+        el('game-over-leaderboard').innerHTML = sorted.map((p, i) => `
+          <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border ${i === 0 ? 'border-yellow-300 shadow-sm bg-yellow-50' : 'border-gray-100'}">
+            <div class="font-bold text-gray-700 text-lg flex items-center gap-3">
+               <span class="${i === 0 ? 'text-yellow-500' : 'text-gray-400'} w-6 inline-block">${i === 0 ? '👑' : '#' + (i+1)}</span>
+               ${p.name} ${p.isBot ? '🤖' : ''}
+            </div>
+            <span class="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-lg font-black text-lg">${p.score} pt</span>
+          </div>
+        `).join('');
+
+        // Continuous confetti for the grand champion
+        if (lastConfettiRound !== 'gameover') {
+           lastConfettiRound = 'gameover';
+           if (typeof confetti === 'function') {
+              var duration = 5 * 1000;
+              var end = Date.now() + duration;
+              (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+              }());
+           }
+        }
+
+        if (isHost) {
+          show('game-over-host-controls');
+          hide('game-over-waiting-msg');
+        } else {
+          hide('game-over-host-controls');
+          show('game-over-waiting-msg');
         }
       }
     }
