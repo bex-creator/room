@@ -18,46 +18,46 @@
 <body class="bg-gray-100 text-gray-900 selection:bg-indigo-200 min-h-screen">
 
   <!-- ERROR / TOAST NOTIFICATION -->
-  <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-[100]">
+  <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-[100] text-sm sm:text-base text-center w-11/12 sm:w-auto max-w-md">
   </div>
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50 hidden">
-    <div class="text-center">
-      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-      <p id="loading-text" class="text-gray-500 font-bold">Connecting via WebRTC...</p>
+    <div class="text-center px-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3 sm:mb-4"></div>
+      <p id="loading-text" class="text-gray-500 font-bold text-sm sm:text-base">Connecting via WebRTC...</p>
     </div>
   </div>
 
   <!-- HOME VIEW (Join/Create) -->
-  <div id="home-view" class="flex flex-col items-center justify-center min-h-[80vh] px-4 pt-10">
+  <div id="home-view" class="flex flex-col items-center justify-center min-h-[80vh] px-4 pt-8 pb-8">
     <div class="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
-      <div class="bg-indigo-600 p-8 text-center">
-        <svg class="w-16 h-16 text-white mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-        <h1 class="text-4xl font-black text-white tracking-tight">Prompted!</h1>
-        <p class="text-indigo-200 mt-2 font-medium">P2P + Offline AI</p>
+      <div class="bg-indigo-600 p-6 sm:p-8 text-center">
+        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-white mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Prompted!</h1>
+        <p class="text-indigo-200 mt-1 sm:mt-2 font-medium text-sm sm:text-base">P2P + Offline AI</p>
       </div>
       
-      <div class="p-8 space-y-6">
+      <div class="p-6 sm:p-8 space-y-5 sm:space-y-6">
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">Your Name</label>
-          <input type="text" id="player-name" placeholder="e.g. Hilarious Harry" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-indigo-500 transition-colors">
+          <label class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">Your Name</label>
+          <input type="text" id="player-name" placeholder="e.g. Hilarious Harry" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-base sm:text-lg focus:outline-none focus:border-indigo-500 transition-colors">
         </div>
 
-        <div class="pt-4 space-y-3">
-          <button id="btn-create-room" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95">
+        <div class="pt-2 sm:pt-4 space-y-3">
+          <button id="btn-create-room" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 text-sm sm:text-base">
             Create Game (Host)
           </button>
           
           <div class="relative flex items-center py-2">
             <div class="flex-grow border-t border-gray-200"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 font-medium text-sm">OR</span>
+            <span class="flex-shrink-0 mx-4 text-gray-400 font-medium text-xs sm:text-sm">OR</span>
             <div class="flex-grow border-t border-gray-200"></div>
           </div>
 
-          <div class="flex gap-2">
-            <input type="text" id="join-code" placeholder="Room Code" maxlength="5" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-mono uppercase focus:outline-none focus:border-indigo-500 text-center">
-            <button id="btn-join-room" class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl transition-transform active:scale-95 whitespace-nowrap">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="join-code" placeholder="Room Code" maxlength="5" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-base sm:text-lg font-mono uppercase focus:outline-none focus:border-indigo-500 text-center">
+            <button id="btn-join-room" class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl transition-transform active:scale-95 whitespace-nowrap text-sm sm:text-base">
               Join
             </button>
           </div>
@@ -69,17 +69,17 @@
   <!-- GAME VIEW -->
   <div id="game-view" class="hidden min-h-screen bg-gray-50 pb-20">
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between sticky top-0 z-50 gap-3">
       <div class="flex items-center gap-2">
-        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-        <h1 class="text-xl font-black text-gray-900 tracking-tight hidden sm:block">Prompted!</h1>
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <h1 class="text-lg sm:text-xl font-black text-gray-900 tracking-tight hidden sm:block">Prompted!</h1>
       </div>
       
-      <div class="flex gap-3">
-        <div class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-lg text-sm font-bold tracking-wide flex items-center gap-2">
-          ROOM: <span id="display-room-code" class="font-mono text-lg"></span>
+      <div class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 flex-grow sm:flex-grow-0">
+        <div class="bg-indigo-100 text-indigo-800 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1 sm:gap-2">
+          ROOM: <span id="display-room-code" class="font-mono text-base sm:text-lg"></span>
         </div>
-        <div class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-bold tracking-wide flex items-center gap-2">
+        <div class="bg-gray-100 text-gray-600 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1 sm:gap-2">
           RND <span id="round-display">1</span>
         </div>
       </div>
@@ -89,12 +89,12 @@
       </button>
     </header>
 
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-8 p-3 sm:p-4 md:p-8">
       
       <!-- Sidebar / Scoreboard -->
-      <aside id="sidebar" class="hidden w-full md:w-64 flex-shrink-0 order-2 md:order-1">
-        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm sticky top-24">
-          <h3 class="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">Scoreboard</h3>
+      <aside id="sidebar" class="hidden w-full lg:w-72 flex-shrink-0 order-2 lg:order-1">
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-sm sticky top-24">
+          <h3 class="text-base sm:text-lg font-black text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">Scoreboard</h3>
           <div id="scoreboard-list" class="space-y-2">
             <!-- Populated by JS -->
           </div>
@@ -102,203 +102,214 @@
       </aside>
 
       <!-- Main Play Area -->
-      <main class="flex-grow order-1 md:order-2 min-h-[60vh] flex flex-col justify-center">
+      <main class="flex-grow order-1 lg:order-2 min-h-[50vh] sm:min-h-[60vh] flex flex-col justify-center w-full overflow-hidden">
         
         <!-- PHASE: LOBBY -->
-        <div id="phase-lobby" class="hidden max-w-2xl mx-auto space-y-6 w-full text-center">
-          <div class="bg-white rounded-3xl p-8 shadow-sm">
-            <h2 class="text-3xl font-black text-gray-900 mb-2">Waiting for players...</h2>
-            <p class="text-gray-500 mb-6">Tell your friends to join using this code:</p>
+        <div id="phase-lobby" class="hidden max-w-2xl mx-auto space-y-4 sm:space-y-6 w-full text-center">
+          <div class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2">Waiting for players...</h2>
+            <p class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">Tell your friends to join using this code:</p>
             
-            <div class="inline-flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-6 mb-8 w-full sm:w-auto cursor-pointer hover:bg-indigo-100 transition-colors relative group" onclick="navigator.clipboard.writeText(roomCode); showToast('Room code copied!');">
-              <span id="lobby-room-code" class="text-6xl font-mono font-black text-indigo-700 tracking-widest"></span>
-              <div class="absolute -top-3 -right-3 bg-indigo-500 text-white p-2 rounded-xl shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <div class="inline-flex items-center justify-center gap-3 sm:gap-4 bg-indigo-50 border-2 border-indigo-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 w-full sm:w-auto cursor-pointer hover:bg-indigo-100 transition-colors relative group" onclick="navigator.clipboard.writeText(roomCode); showToast('Room code copied!');">
+              <span id="lobby-room-code" class="text-4xl sm:text-5xl md:text-6xl font-mono font-black text-indigo-700 tracking-widest break-all"></span>
+              <div class="absolute -top-3 -right-3 bg-indigo-500 text-white p-2 rounded-xl shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
+                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
               </div>
             </div>
 
-            <div id="lobby-players-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-left mb-8">
+            <div id="lobby-players-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 text-left mb-6 sm:mb-8">
               <!-- Populated by JS -->
             </div>
 
-            <div id="host-controls" class="hidden mt-6 space-y-4">
+            <div id="host-controls" class="hidden mt-4 sm:mt-6 space-y-4">
               <!-- Local AI Loader UI -->
-              <div id="ai-loader-container" class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                <button id="btn-load-ai" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg text-sm transition-transform active:scale-95 shadow-sm">
+              <div id="ai-loader-container" class="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 text-center">
+                <button id="btn-load-ai" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 sm:px-6 rounded-lg text-xs sm:text-sm transition-transform active:scale-95 shadow-sm w-full sm:w-auto">
                   Load Local Offline AI (Runs on GPU)
                 </button>
                 <div id="ai-progress-container" class="hidden w-full mt-3">
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div id="ai-progress-bar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="ai-progress-bar" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
                   </div>
-                  <p id="ai-progress-text" class="text-xs text-gray-500 mt-2 font-mono">Initializing...</p>
+                  <p id="ai-progress-text" class="text-[10px] sm:text-xs text-gray-500 mt-2 font-mono break-all px-2">Initializing...</p>
                 </div>
-                <div id="ai-ready-badge" class="hidden text-green-600 font-bold text-sm flex items-center justify-center gap-1 mt-2">
+                <div id="ai-ready-badge" class="hidden text-green-600 font-bold text-xs sm:text-sm flex items-center justify-center gap-1 mt-2">
                   ✓ Local AI Loaded & Ready
                 </div>
               </div>
 
-              <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-                <button id="btn-add-bot" disabled class="bg-indigo-100 text-indigo-400 font-bold py-4 px-6 rounded-2xl flex-1 flex items-center justify-center gap-2 shadow-sm cursor-not-allowed">
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center max-w-md mx-auto">
+                <button id="btn-add-bot" disabled class="bg-indigo-100 text-indigo-400 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl flex-1 flex items-center justify-center gap-2 shadow-sm cursor-not-allowed text-sm sm:text-base">
                   🤖 Add Bot
                 </button>
-                <button id="btn-start-game" disabled class="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black py-4 px-6 rounded-2xl flex-[2] flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm">
+                <button id="btn-start-game" disabled class="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl flex-[2] flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm text-sm sm:text-base">
                   Start Game
                 </button>
               </div>
-              <div class="flex items-center justify-center gap-2 mt-4">
-                <input type="checkbox" id="setting-bot-judges" checked class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                <label for="setting-bot-judges" class="text-sm font-bold text-gray-600 cursor-pointer">Bots take turns as Judge (Make Prompts)</label>
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 bg-gray-50 p-3 rounded-xl sm:bg-transparent sm:p-0">
+                <div class="flex items-center justify-center gap-2">
+                  <input type="checkbox" id="setting-bot-judges" checked class="w-4 h-4 sm:w-5 sm:h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                  <label for="setting-bot-judges" class="text-xs sm:text-sm font-bold text-gray-600 cursor-pointer">Bots Judge</label>
+                </div>
+                <div class="hidden sm:block text-gray-300">|</div>
+                <div class="flex items-center justify-center gap-2">
+                  <input type="checkbox" id="setting-dirty-mode" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                  <label for="setting-dirty-mode" class="text-xs sm:text-sm font-bold text-red-600 cursor-pointer flex items-center gap-1">
+                    <span class="text-base sm:text-lg">🔥</span> Dirty Mode
+                  </label>
+                </div>
+                <div class="hidden sm:block text-gray-300">|</div>
+                <div class="flex items-center justify-center gap-2">
+                  <label for="setting-score-limit" class="text-xs sm:text-sm font-bold text-gray-600 cursor-pointer">Win Score:</label>
+                  <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-12 h-7 sm:w-16 sm:h-8 text-center rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 font-bold outline-none border-2 text-sm sm:text-base">
+                </div>
               </div>
-              <div class="flex items-center justify-center gap-2 mt-2">
-                <input type="checkbox" id="setting-dirty-mode" class="w-5 h-5 rounded text-red-600 focus:ring-red-500 cursor-pointer">
-                <label for="setting-dirty-mode" class="text-sm font-bold text-red-600 cursor-pointer flex items-center gap-1">
-                  <span class="text-lg">🔥</span> Dirty Mode (NSFW / Unhinged Bots)
-                </label>
-              </div>
-              <div class="flex items-center justify-center gap-2 mt-2">
-                <label for="setting-score-limit" class="text-sm font-bold text-gray-600 cursor-pointer">Score to Win:</label>
-                <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-16 h-8 text-center rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 font-bold outline-none border-2">
-              </div>
-              <p id="lobby-waiting-msg" class="text-sm text-gray-400 mt-3 font-medium">Need at least 2 players to start</p>
+              <p id="lobby-waiting-msg" class="text-xs sm:text-sm text-gray-400 mt-3 font-medium">Need at least 2 players to start</p>
             </div>
-            <p id="client-waiting-msg" class="text-gray-500 font-bold animate-pulse hidden">Waiting for host to start...</p>
+            <p id="client-waiting-msg" class="text-sm sm:text-base text-gray-500 font-bold animate-pulse hidden">Waiting for host to start...</p>
           </div>
         </div>
 
         <!-- PHASE: PICKING -->
-        <div id="phase-picking" class="hidden max-w-3xl mx-auto space-y-6 w-full">
-          <div id="picking-judge-view" class="hidden bg-white rounded-3xl p-8 shadow-sm">
-            <div class="flex items-center gap-3 mb-6 text-indigo-600">
-              <span class="text-4xl">👑</span>
-              <h2 class="text-3xl font-black">You are the Judge!</h2>
+        <div id="phase-picking" class="hidden max-w-3xl mx-auto space-y-4 sm:space-y-6 w-full">
+          <div id="picking-judge-view" class="hidden bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6 text-indigo-600">
+              <span class="text-3xl sm:text-4xl">👑</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-center sm:text-left">You are the Judge!</h2>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Choose a prompt for the group:</h3>
             
-            <div id="prompt-options" class="space-y-3 mb-8"></div>
+            <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-3">
+              <h3 class="text-lg sm:text-xl font-bold text-gray-800 text-center sm:text-left">Choose a prompt for the group:</h3>
+              <button onclick="dispatchAction({type: 'REROLL_PROMPTS'})" class="w-full sm:w-auto text-xs sm:text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-bold py-2 sm:py-1.5 px-3 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Reroll
+              </button>
+            </div>
+            
+            <div id="prompt-options" class="space-y-2 sm:space-y-3 mb-6 sm:mb-8"></div>
 
-            <div class="relative flex items-center py-4">
+            <div class="relative flex items-center py-2 sm:py-4">
               <div class="flex-grow border-t border-gray-200"></div>
-              <span class="flex-shrink-0 mx-4 text-gray-400 font-bold text-sm uppercase tracking-wider">Or write your own</span>
+              <span class="flex-shrink-0 mx-2 sm:mx-4 text-gray-400 font-bold text-xs sm:text-sm uppercase tracking-wider">Or write your own</span>
               <div class="flex-grow border-t border-gray-200"></div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-3 mt-4">
-              <input type="text" id="custom-prompt-input" placeholder="Type a custom prompt here..." class="flex-grow bg-gray-50 border-2 border-gray-200 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-indigo-500">
-              <button id="btn-use-custom" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-transform active:scale-95 whitespace-nowrap">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
+              <input type="text" id="custom-prompt-input" placeholder="Type a custom prompt here..." class="flex-grow bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-base sm:text-lg focus:outline-none focus:border-indigo-500">
+              <button id="btn-use-custom" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl transition-transform active:scale-95 whitespace-nowrap text-sm sm:text-base">
                 Use Custom
               </button>
             </div>
           </div>
 
-          <div id="picking-player-view" class="hidden mt-10 text-center space-y-6">
-            <div class="text-6xl mb-4 animate-bounce">👑</div>
-            <h2 class="text-3xl font-black text-gray-800">
+          <div id="picking-player-view" class="hidden mt-6 sm:mt-10 text-center space-y-4 sm:space-y-6 px-4">
+            <div class="text-5xl sm:text-6xl mb-2 sm:mb-4 animate-bounce">👑</div>
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-800 break-words">
               <span id="picking-judge-name" class="text-indigo-600">Someone</span> is picking a prompt...
             </h2>
-            <p class="text-gray-500 text-lg">Get your creative juices flowing.</p>
+            <p class="text-sm sm:text-lg text-gray-500">Get your creative juices flowing.</p>
           </div>
         </div>
 
         <!-- PHASE: ANSWERING -->
-        <div id="phase-answering" class="hidden max-w-3xl mx-auto space-y-6 w-full">
-          <div class="bg-indigo-600 rounded-3xl p-8 sm:p-12 shadow-lg text-center transform -rotate-1">
-            <h2 id="answering-prompt-text" class="text-3xl sm:text-4xl font-black text-white leading-tight"></h2>
+        <div id="phase-answering" class="hidden max-w-3xl mx-auto space-y-4 sm:space-y-6 w-full">
+          <div class="bg-indigo-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-lg text-center transform -rotate-1 mx-2 sm:mx-0">
+            <h2 id="answering-prompt-text" class="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight break-words"></h2>
           </div>
 
-          <div id="answering-judge-view" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
-            <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Waiting for answers...</h3>
-            <p id="answering-judge-status" class="text-gray-500 text-lg"></p>
+          <div id="answering-judge-view" class="hidden bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm text-center">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4 sm:mb-6"></div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Waiting for answers...</h3>
+            <p id="answering-judge-status" class="text-sm sm:text-lg text-gray-500"></p>
           </div>
 
-          <div id="answering-player-view" class="hidden bg-white rounded-3xl p-8 shadow-sm">
-            <label class="block text-xl font-bold text-gray-800 mb-4">Your Answer:</label>
-            <textarea id="my-answer-input" placeholder="Make it hilarious or horrible..." rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-4 text-xl focus:outline-none focus:border-indigo-500 resize-none mb-4"></textarea>
-            <button id="btn-submit-answer" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl text-xl transition-transform active:scale-95">
+          <div id="answering-player-view" class="hidden bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm">
+            <label class="block text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Your Answer:</label>
+            <textarea id="my-answer-input" placeholder="Make it hilarious or horrible..." rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl px-4 py-3 sm:px-5 sm:py-4 text-base sm:text-xl focus:outline-none focus:border-indigo-500 resize-none mb-3 sm:mb-4"></textarea>
+            <button id="btn-submit-answer" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 sm:py-4 rounded-xl text-base sm:text-xl transition-transform active:scale-95">
               Lock it in!
             </button>
           </div>
 
-          <div id="answering-done-view" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
-            <div class="text-6xl text-green-500 mb-4">✓</div>
-            <h3 class="text-2xl font-bold text-gray-800">Answer locked in!</h3>
-            <p id="answering-done-status" class="text-gray-500 mt-2 font-medium"></p>
+          <div id="answering-done-view" class="hidden bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm text-center">
+            <div class="text-5xl sm:text-6xl text-green-500 mb-3 sm:mb-4">✓</div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Answer locked in!</h3>
+            <p id="answering-done-status" class="text-sm sm:text-base text-gray-500 mt-2 font-medium"></p>
           </div>
         </div>
 
         <!-- PHASE: JUDGING -->
-        <div id="phase-judging" class="hidden max-w-4xl mx-auto space-y-8 w-full">
-          <div class="text-center space-y-2">
-            <h2 class="text-2xl font-bold text-gray-500 uppercase tracking-widest text-sm">The Prompt</h2>
-            <h3 id="judging-prompt-text" class="text-3xl font-black text-gray-900"></h3>
+        <div id="phase-judging" class="hidden max-w-4xl mx-auto space-y-6 sm:space-y-8 w-full">
+          <div class="text-center space-y-1 sm:space-y-2 px-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-500 uppercase tracking-widest text-xs sm:text-sm">The Prompt</h2>
+            <h3 id="judging-prompt-text" class="text-2xl sm:text-3xl font-black text-gray-900 break-words"></h3>
           </div>
 
-          <div class="bg-gray-100 rounded-3xl p-6 sm:p-8">
-            <div class="flex flex-col items-center justify-center gap-3 mb-8">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl">👑</span>
-                <h4 id="judging-header-text" class="text-2xl font-bold text-gray-800"></h4>
+          <div class="bg-gray-100 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8">
+            <div class="flex flex-col items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 text-center">
+              <div class="flex items-center justify-center gap-2 sm:gap-3">
+                <span class="text-2xl sm:text-3xl">👑</span>
+                <h4 id="judging-header-text" class="text-lg sm:text-2xl font-bold text-gray-800 leading-tight"></h4>
               </div>
               
               <!-- AI Judging Progress Bar -->
-              <div id="ai-judge-timer-container" class="hidden w-full max-w-md mt-4">
-                <div class="flex justify-between text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">
+              <div id="ai-judge-timer-container" class="hidden w-full max-w-md mt-2 sm:mt-4">
+                <div class="flex justify-between text-[10px] sm:text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">
                   <span>AI is reading...</span>
                   <span>Decision incoming</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div id="ai-judge-timer-bar" class="bg-indigo-600 h-2 rounded-full w-0" style="transition: width 20s linear;"></div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 overflow-hidden">
+                  <div id="ai-judge-timer-bar" class="bg-indigo-600 h-1.5 sm:h-2 rounded-full w-0" style="transition: width 20s linear;"></div>
                 </div>
               </div>
             </div>
 
-            <div id="judging-answers-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            <div id="judging-answers-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
           </div>
         </div>
 
         <!-- PHASE: RESULTS -->
-        <div id="phase-results" class="hidden max-w-3xl mx-auto text-center space-y-8 w-full">
-          <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+        <div id="phase-results" class="hidden max-w-3xl mx-auto text-center space-y-6 sm:space-y-8 w-full px-2 sm:px-0">
+          <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500"></div>
-            <div class="text-6xl mb-6">🏆</div>
-            <h2 class="text-xl font-bold text-gray-500 mb-2 uppercase tracking-wide">Winner!</h2>
-            <h3 id="results-winner-name" class="text-4xl font-black text-gray-900 mb-8"></h3>
+            <div class="text-5xl sm:text-6xl mb-4 sm:mb-6">🏆</div>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Winner!</h2>
+            <h3 id="results-winner-name" class="text-3xl sm:text-4xl font-black text-gray-900 mb-6 sm:mb-8 break-words"></h3>
             
-            <div class="bg-gray-50 rounded-2xl p-6 sm:p-8 relative inline-block text-left w-full border border-gray-100 shadow-inner">
-              <p class="text-sm font-bold text-indigo-600 mb-3 uppercase tracking-wider">The Prompt:</p>
-              <p id="results-prompt-text" class="text-xl text-gray-600 mb-6 italic"></p>
+            <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 relative inline-block text-left w-full border border-gray-100 shadow-inner">
+              <p class="text-xs sm:text-sm font-bold text-indigo-600 mb-2 sm:mb-3 uppercase tracking-wider">The Prompt:</p>
+              <p id="results-prompt-text" class="text-base sm:text-xl text-gray-600 mb-4 sm:mb-6 italic break-words"></p>
               
-              <p class="text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Winning Answer:</p>
-              <p id="results-winning-answer" class="text-3xl font-black text-gray-900 leading-tight"></p>
+              <p class="text-xs sm:text-sm font-bold text-green-600 mb-2 sm:mb-3 uppercase tracking-wider">Winning Answer:</p>
+              <p id="results-winning-answer" class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight break-words"></p>
             </div>
           </div>
 
-          <div id="results-host-controls" class="hidden">
-            <button id="btn-next-round" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-10 rounded-2xl text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
+          <div id="results-host-controls" class="hidden pb-6">
+            <button id="btn-next-round" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl text-lg sm:text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
               Start Next Round
             </button>
           </div>
-          <p id="results-waiting-msg" class="hidden text-xl font-bold text-gray-500 animate-pulse">Waiting for host to start next round...</p>
+          <p id="results-waiting-msg" class="hidden text-base sm:text-xl font-bold text-gray-500 animate-pulse pb-6">Waiting for host to start next round...</p>
         </div>
 
         <!-- PHASE: GAME OVER -->
-        <div id="phase-game-over" class="hidden max-w-3xl mx-auto text-center space-y-8 w-full">
-          <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
-             <div class="text-8xl mb-6 animate-bounce">👑</div>
-             <h2 class="text-2xl font-bold text-gray-500 mb-2 uppercase tracking-wide">Grand Champion</h2>
-             <h3 id="game-over-winner-name" class="text-5xl font-black text-indigo-600 mb-8"></h3>
+        <div id="phase-game-over" class="hidden max-w-3xl mx-auto text-center space-y-6 sm:space-y-8 w-full px-2 sm:px-0">
+          <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+             <div class="text-6xl sm:text-8xl mb-4 sm:mb-6 animate-bounce">👑</div>
+             <h2 class="text-xl sm:text-2xl font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Grand Champion</h2>
+             <h3 id="game-over-winner-name" class="text-3xl sm:text-5xl font-black text-indigo-600 mb-6 sm:mb-8 break-words"></h3>
              
-             <h4 class="text-lg font-bold text-gray-400 uppercase tracking-widest mb-4">Final Scores</h4>
-             <div id="game-over-leaderboard" class="space-y-3 max-w-md mx-auto text-left"></div>
+             <h4 class="text-base sm:text-lg font-bold text-gray-400 uppercase tracking-widest mb-3 sm:mb-4">Final Scores</h4>
+             <div id="game-over-leaderboard" class="space-y-2 sm:space-y-3 max-w-md mx-auto text-left"></div>
           </div>
           
-          <div id="game-over-host-controls" class="hidden">
-            <button id="btn-back-to-lobby" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-10 rounded-2xl text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
+          <div id="game-over-host-controls" class="hidden pb-6">
+            <button id="btn-back-to-lobby" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl text-lg sm:text-xl transition-transform active:scale-95 shadow-lg shadow-indigo-200">
               Return to Lobby
             </button>
           </div>
-          <p id="game-over-waiting-msg" class="hidden text-xl font-bold text-gray-500 animate-pulse">Waiting for host to return to lobby...</p>
+          <p id="game-over-waiting-msg" class="hidden text-base sm:text-xl font-bold text-gray-500 animate-pulse pb-6">Waiting for host to return to lobby...</p>
         </div>
 
       </main>
@@ -311,6 +322,7 @@
 
     // --- CONSTANTS ---
     const APP_PREFIX = "prompted-v1-"; 
+    const AVATARS = ['🦊', '🐙', '🐸', '🦄', '🐧', '🦉', '🐢', '🦖', '🐳', '🐒', '🐶', '🐱', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐔', '👽', '👻', '👾'];
     const SAMPLE_PROMPTS = [
       "The worst thing to bring to a job interview is...",
       "What's the real reason aliens haven't visited us?",
@@ -366,22 +378,25 @@
       judgeIndex: 0,
       currentPrompt: '',
       answers: {},        
+      likes: {},          // stores audience reactions { answerId: [peerIds] }
       winnerId: '',
       phase: 'lobby',     
       roundNumber: 1,
+      rerolls: 0,
       settings: { allowBotJudges: true, dirtyMode: false, scoreToWin: 5 }
     };
 
     let myPeer = null;
     let myId = null;
     let myName = '';
+    let myAvatar = '';
     let isHost = false;
     let roomCode = '';
     
     let hostConnection = null; 
     let clientConnections = {}; 
     let localAIEngine = null;
-    let lastConfettiRound = 0; // Tracks when to fire confetti
+    let lastConfettiRound = 0;
 
     // --- DOM HELPERS ---
     const el = id => document.getElementById(id);
@@ -414,7 +429,6 @@
         };
 
         // Load Qwen 2.5 local model via WebGPU
-        // Note: You can change this to "Qwen2.5-7B-Instruct-q4f16_1-MLC" for a smarter but heavier model
         localAIEngine = await CreateMLCEngine("Qwen2.5-1.5B-Instruct-q4f16_1-MLC", { initProgressCallback });
         
         hide('ai-progress-container');
@@ -423,7 +437,7 @@
         // Enable Add Bot button
         const btnAddBot = el('btn-add-bot');
         btnAddBot.disabled = false;
-        btnAddBot.className = "bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-4 px-6 rounded-2xl flex-1 flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm";
+        btnAddBot.className = "bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl flex-1 flex items-center justify-center gap-2 shadow-sm text-sm sm:text-base cursor-pointer transition-transform active:scale-95";
         showToast("Local AI Loaded Successfully!");
 
       } catch (err) {
@@ -440,6 +454,7 @@
       const name = el('player-name').value.trim();
       if (!name) return showToast("Please enter your name.");
       myName = name;
+      myAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
       isHost = true;
       
       showLoading("Creating Room...");
@@ -453,7 +468,7 @@
         hideLoading();
         hide('home-view');
         show('game-view');
-        state.players.push({ id: myId, name: myName, score: 0, isBot: false });
+        state.players.push({ id: myId, name: myName, score: 0, isBot: false, avatar: myAvatar });
         render();
       });
 
@@ -483,6 +498,7 @@
       if (!roomCode) return showToast("Please enter a room code.");
       
       myName = name;
+      myAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
       isHost = false;
       
       showLoading("Connecting to Host...");
@@ -497,7 +513,7 @@
           hideLoading();
           hide('home-view');
           show('game-view');
-          hostConnection.send({ type: 'JOIN', name: myName });
+          hostConnection.send({ type: 'JOIN', name: myName, avatar: myAvatar });
         });
 
         hostConnection.on('data', (data) => {
@@ -538,6 +554,7 @@
       if (myPeer) myPeer.destroy();
       state.players = [];
       state.answers = {};
+      state.likes = {};
       clientConnections = {};
       hostConnection = null;
       hide('game-view');
@@ -554,7 +571,7 @@
       const botNames = state.settings.dirtyMode ? dirtyBotNames : cleanBotNames;
       const name = botNames[Math.floor(Math.random() * botNames.length)] + ' ' + Math.floor(Math.random() * 100);
       const botId = 'bot_' + Math.random().toString(36).substring(2, 9);
-      state.players.push({ id: botId, name: name, score: 0, isBot: true });
+      state.players.push({ id: botId, name: name, score: 0, isBot: true, avatar: '🤖' });
       broadcastState();
     });
 
@@ -589,6 +606,10 @@
       }
     }
 
+    window.likeAnswer = function(id) {
+      dispatchAction({ type: 'LIKE_ANSWER', answerId: id });
+    }
+
     // --- GAME LOGIC (HOST AUTHORITATIVE) ---
     function handleClientMessage(senderPeerId, action) {
       if (!isHost) return;
@@ -597,22 +618,35 @@
       switch(action.type) {
         case 'JOIN':
           if (!state.players.find(p => p.id === senderPeerId)) {
-            state.players.push({ id: senderPeerId, name: action.name, score: 0, isBot: false });
+            state.players.push({ id: senderPeerId, name: action.name, score: 0, isBot: false, avatar: action.avatar || '👤' });
           }
           break;
         case 'START_GAME':
           state.phase = 'picking';
           state.roundNumber = 1;
+          state.rerolls = 0;
+          state.likes = {};
           state.judgeIndex = 0;
           break;
         case 'SUBMIT_PROMPT':
           state.currentPrompt = action.promptText;
           state.answers = {};
+          state.likes = {};
           state.phase = 'answering';
           break;
         case 'SUBMIT_ANSWER':
           state.answers[senderPeerId] = action.answerText;
           checkAutoAdvance();
+          break;
+        case 'REROLL_PROMPTS':
+          state.rerolls = (state.rerolls || 0) + 1;
+          break;
+        case 'LIKE_ANSWER':
+          if (!state.likes) state.likes = {};
+          if (!state.likes[action.answerId]) state.likes[action.answerId] = [];
+          if (!state.likes[action.answerId].includes(senderPeerId)) {
+             state.likes[action.answerId].push(senderPeerId);
+          }
           break;
         case 'PICK_WINNER':
           state.winnerId = action.winnerId;
@@ -628,7 +662,6 @@
         case 'KICK_PLAYER':
           state.players = state.players.filter(p => p.id !== action.playerId);
           delete state.answers[action.playerId];
-          // If kicking a human client, close their connection
           if (clientConnections[action.playerId]) {
             clientConnections[action.playerId].close();
           }
@@ -649,6 +682,8 @@
           state.players.forEach(p => p.score = 0);
           state.currentPrompt = '';
           state.answers = {};
+          state.likes = {};
+          state.rerolls = 0;
           state.winnerId = '';
           break;
         case 'NEXT_ROUND':
@@ -664,6 +699,8 @@
           state.judgeIndex = nextIdx;
           state.currentPrompt = '';
           state.answers = {};
+          state.likes = {};
+          state.rerolls = 0;
           state.winnerId = '';
           state.phase = 'picking';
           break;
@@ -774,7 +811,6 @@
                { role: "user", content: `Prompt: "${state.currentPrompt}"` }
              ];
              
-             // Generate locally with high temperature for maximum chaos
              const reply = await localAIEngine.chat.completions.create({ messages, temperature: 1.1 });
              let text = reply.choices[0].message.content.trim();
              text = text.replace(/^["']|["']$/g, '');
@@ -815,7 +851,6 @@
                const reply = await localAIEngine.chat.completions.create({ messages, temperature: 0.1 });
                let text = reply.choices[0].message.content.trim();
                
-               // Look for the isolated number in the AI's response
                const match = text.match(/\b\d+\b/);
                let winnerIndex = -1;
                if (match) {
@@ -871,11 +906,12 @@
             <div class="flex items-center justify-between p-3 rounded-xl ${isThisJudge ? 'bg-indigo-50 border border-indigo-100' : 'bg-gray-50'} ${pulsingClass} group">
               <div class="flex items-center gap-2 truncate">
                 <span>${isThisJudge ? '👑' : ''}</span>
-                <span class="font-bold text-gray-700 truncate">${p.name} ${p.isBot ? '🤖' : ''} ${p.id === myId ? '(You)' : ''}</span>
+                <span class="text-xl">${p.avatar || '👤'}</span>
+                <span class="font-bold text-gray-700 truncate">${p.name} ${p.id === myId ? '(You)' : ''}</span>
               </div>
               <div class="flex items-center gap-2 font-bold">${statusIcon}
                 <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-black">${p.score}</span>
-                ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity ml-1" title="Kick Player"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
+                ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="opacity-0 lg:group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity ml-1" title="Kick Player"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
               </div>
             </div>`;
         }).join('');
@@ -890,13 +926,12 @@
         el('lobby-room-code').textContent = roomCode;
         
         el('lobby-players-grid').innerHTML = state.players.map(p => `
-          <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-2 border border-gray-100 relative group">
-            ${p.isBot ? '<div class="absolute top-2 right-2 text-xs font-bold text-gray-400">BOT</div>' : ''}
-            ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity bg-white rounded-full p-1 shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
-            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl mt-2">
-              ${p.isBot ? '🤖' : p.name.charAt(0).toUpperCase()}
+          <div class="bg-gray-50 rounded-xl p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 border border-gray-100 relative group">
+            ${isHost && p.id !== myId ? `<button onclick="window.kickPlayer('${p.id}')" class="absolute top-1 sm:top-2 left-1 sm:left-2 lg:opacity-0 lg:group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity bg-white rounded-full p-1 shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-100 flex items-center justify-center text-xl sm:text-2xl mt-1 sm:mt-2 shadow-inner">
+              ${p.avatar || '👤'}
             </div>
-            <span class="font-semibold text-gray-700 w-full text-center truncate">${p.name}</span>
+            <span class="font-semibold text-gray-700 w-full text-center text-xs sm:text-base truncate">${p.name}</span>
           </div>
         `).join('');
 
@@ -921,12 +956,12 @@
           let pool = [...SAMPLE_PROMPTS];
           let chosen = [];
           for(let i = 0; i < 3; i++) {
-             let idx = (state.roundNumber * 7 + i * 13) % pool.length;
+             let idx = (state.roundNumber * 7 + i * 13 + (state.rerolls || 0) * 11) % pool.length;
              chosen.push(pool.splice(idx, 1)[0]);
           }
 
           el('prompt-options').innerHTML = chosen.map(prompt => `
-            <button onclick="window.submitSpecificPrompt('${prompt.replace(/'/g, "\\'")}')" class="w-full text-left bg-gray-50 hover:bg-indigo-50 border-2 border-gray-100 hover:border-indigo-200 p-5 rounded-2xl text-lg font-medium text-gray-700 shadow-sm">
+            <button onclick="window.submitSpecificPrompt('${prompt.replace(/'/g, "\\'")}')" class="w-full text-left bg-gray-50 hover:bg-indigo-50 border-2 border-gray-100 hover:border-indigo-200 p-4 sm:p-5 rounded-xl sm:rounded-2xl text-base sm:text-lg font-medium text-gray-700 shadow-sm transition-transform active:scale-95">
               ${prompt}
             </button>
           `).join('');
@@ -966,12 +1001,11 @@
       else if (state.phase === 'judging') {
         show('phase-judging');
         el('judging-prompt-text').textContent = `"${state.currentPrompt}"`;
-        el('judging-header-text').textContent = amIJudge ? "Pick your favorite answer!" : `${currentJudge?.name} is deciding...`;
+        el('judging-header-text').textContent = amIJudge ? "Pick your favorite answer!" : "Tap your favorite answers to laugh 😂!";
 
         // Handle AI Timer Animation
         if (currentJudge?.isBot) {
            show('ai-judge-timer-container');
-           // Small delay to allow the DOM to reset, then trigger the 20s CSS transition
            el('ai-judge-timer-bar').style.width = '0%';
            setTimeout(() => { el('ai-judge-timer-bar').style.width = '100%'; }, 50);
         } else {
@@ -983,14 +1017,19 @@
           .map(([peerId, text]) => ({ peerId, text }))
           .sort((a, b) => a.text.localeCompare(b.text));
 
-        el('judging-answers-grid').innerHTML = answersList.map(ans => `
+        el('judging-answers-grid').innerHTML = answersList.map(ans => {
+          const likesCount = (state.likes && state.likes[ans.peerId]) ? state.likes[ans.peerId].length : 0;
+          const likeBadge = likesCount > 0 ? `<div class="absolute -bottom-3 -right-2 bg-white border border-gray-200 shadow-sm rounded-full px-2 py-1 text-xs sm:text-sm flex items-center gap-1"><span class="text-base sm:text-lg">😂</span> <span class="font-bold text-gray-600">${likesCount}</span></div>` : '';
+          
+          return `
           <button 
-            ${amIJudge ? `onclick="window.pickWinner('${ans.peerId}')"` : 'disabled'} 
-            class="text-left bg-white p-6 rounded-2xl border-2 ${amIJudge ? 'border-transparent hover:border-indigo-400 hover:shadow-md cursor-pointer' : 'border-gray-200 cursor-default'} relative shadow-sm"
+            ${amIJudge ? `onclick="window.pickWinner('${ans.peerId}')"` : `onclick="window.likeAnswer('${ans.peerId}')"`} 
+            class="text-left bg-white p-5 sm:p-6 rounded-xl sm:rounded-2xl border-2 ${amIJudge ? 'border-transparent hover:border-indigo-400 hover:shadow-md cursor-pointer' : 'border-gray-200 cursor-pointer hover:border-pink-300'} relative shadow-sm transition-all active:scale-95"
           >
-            <p class="text-2xl font-bold text-gray-800">${ans.text}</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 break-words">${ans.text}</p>
+            ${likeBadge}
           </button>
-        `).join('');
+        `}).join('');
       }
 
       else if (state.phase === 'results') {
@@ -1022,16 +1061,17 @@
         show('phase-game-over');
         
         const winner = [...state.players].sort((a,b) => b.score - a.score)[0];
-        el('game-over-winner-name').textContent = (winner?.name || 'Unknown') + (winner?.isBot ? ' 🤖' : '');
+        el('game-over-winner-name').textContent = (winner?.name || 'Unknown');
 
         const sorted = [...state.players].sort((a,b) => b.score - a.score);
         el('game-over-leaderboard').innerHTML = sorted.map((p, i) => `
-          <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border ${i === 0 ? 'border-yellow-300 shadow-sm bg-yellow-50' : 'border-gray-100'}">
-            <div class="font-bold text-gray-700 text-lg flex items-center gap-3">
-               <span class="${i === 0 ? 'text-yellow-500' : 'text-gray-400'} w-6 inline-block">${i === 0 ? '👑' : '#' + (i+1)}</span>
-               ${p.name} ${p.isBot ? '🤖' : ''}
+          <div class="flex justify-between items-center bg-gray-50 p-3 sm:p-4 rounded-xl border ${i === 0 ? 'border-yellow-300 shadow-sm bg-yellow-50' : 'border-gray-100'}">
+            <div class="font-bold text-gray-700 text-base sm:text-lg flex items-center gap-2 sm:gap-3">
+               <span class="${i === 0 ? 'text-yellow-500' : 'text-gray-400'} w-5 sm:w-6 inline-block">${i === 0 ? '👑' : '#' + (i+1)}</span>
+               <span class="text-xl sm:text-2xl">${p.avatar || '👤'}</span>
+               <span class="truncate max-w-[100px] sm:max-w-[200px]">${p.name}</span>
             </div>
-            <span class="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-lg font-black text-lg">${p.score} pt</span>
+            <span class="bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-black text-base sm:text-lg">${p.score} pt</span>
           </div>
         `).join('');
 
