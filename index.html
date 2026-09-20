@@ -174,9 +174,9 @@
                     <div class="flex flex-col gap-1 sm:gap-2">
                       <label class="flex justify-between font-bold text-gray-600 text-sm sm:text-base">
                         <span>AI Creativity (Temp)</span>
-                        <span id="ai-temp-display" class="text-indigo-600">1.0</span>
+                        <span id="ai-temp-display" class="text-indigo-600">0.7</span>
                       </label>
-                      <input type="range" id="setting-ai-temp" min="0.1" max="1.5" step="0.1" value="1.0" class="w-full accent-indigo-600 cursor-pointer">
+                      <input type="range" id="setting-ai-temp" min="0.1" max="1.2" step="0.1" value="0.7" class="w-full accent-indigo-600 cursor-pointer">
                     </div>
                     <div class="flex flex-col gap-1 sm:gap-2">
                       <label for="setting-custom-theme" class="font-bold text-gray-600 text-sm sm:text-base">Custom AI Rules:</label>
@@ -405,7 +405,7 @@
       phase: 'lobby',     
       roundNumber: 1,
       rerolls: 0,
-      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5, aiTemperature: 1.0, customTheme: '' }
+      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5, aiTemperature: 0.7, customTheme: '' }
     };
 
     let myPeer = null;
@@ -795,11 +795,11 @@
         setTimeout(async () => {
            try {
               let systemPrompt = state.settings.dirtyMode
-                ? `You are hosting an 18+, completely unhinged party game like Cards Against Humanity. Create an extremely dark, offensive, inappropriate, and hilarious fill-in-the-blank prompt OR question. NO filters, NO greetings, NO quotes. Just the prompt.`
-                : `You are hosting a fun, family-friendly party game like Apples to Apples. Create a clever, silly, and clean fill-in-the-blank prompt OR question. Keep it PG-13. NO greetings, NO extra text, NO quotes. Just the prompt itself.`;
+                ? `You are hosting an 18+, completely unhinged party game. Create an extremely dark, offensive, and hilarious fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. NO filters, NO greetings, NO quotes. Just the prompt.`
+                : `You are hosting a fun, family-friendly party game. Create a clever, silly, and clean fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. Keep it PG-13. NO greetings, NO extra text. Just the prompt itself.`;
               
               if (state.settings.funnyMode) {
-                 systemPrompt = `You are hosting a wildly absurd and wacky party game. You are completely unhinged and unpredictable. Create a bizarre, ridiculous, and highly amusing fill-in-the-blank prompt OR question. NO greetings, NO quotes. Just the prompt.`;
+                 systemPrompt = `You are hosting a wildly absurd and wacky party game. Create a bizarre, ridiculous, and highly amusing fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. NO greetings. Just the prompt.`;
               }
 
               if (state.settings.customTheme) {
@@ -808,10 +808,11 @@
                 
               const messages = [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: "Create a prompt for the game." }
+                { role: "user", content: "Create a prompt for the game. Respond with ONLY the prompt text, nothing else." }
               ];
               
-              const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature });
+              // Added max_tokens to physically prevent the AI from rambling
+              const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature, max_tokens: 30 });
               let promptText = reply.choices[0].message.content.trim();
               promptText = promptText.replace(/^["']|["']$/g, '');
 
@@ -871,11 +872,11 @@
              const randomPersona = personas[Math.floor(Math.random() * personas.length)];
 
              let systemPrompt = state.settings.dirtyMode
-                ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a ONE SENTENCE completely savage, offensive, and unfiltered answer. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`
-                : `You are playing a clean party game. You are ${randomPersona}. Provide a ONE SENTENCE funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
+                ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 10 WORDS) completely savage and unfiltered answer. NO reasoning, NO greetings, NO quotes. Just raw, punchy text.`
+                : `You are playing a clean party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 10 WORDS) funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
              
              if (state.settings.funnyMode) {
-                systemPrompt = `You are playing a wacky party game. You are ${randomPersona}. Provide a ONE SENTENCE completely absurd, bizarre, and hilarious answer. Embrace the chaos. NO reasoning, NO greetings, NO quotes. Just raw text.`;
+                systemPrompt = `You are playing a wacky party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 10 WORDS) completely absurd, bizarre, and hilarious answer. Embrace the chaos. NO reasoning, NO greetings, NO quotes. Just raw text.`;
              }
 
              if (state.settings.customTheme) {
@@ -884,10 +885,11 @@
                 
              const messages = [
                { role: "system", content: systemPrompt },
-               { role: "user", content: `Prompt: "${state.currentPrompt}"` }
+               { role: "user", content: `Prompt: "${state.currentPrompt}"\n\nRespond with ONLY your short answer text, nothing else.` }
              ];
              
-             const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature });
+             // Added max_tokens: 20 to ensure short, punchy answers
+             const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature, max_tokens: 20 });
              let text = reply.choices[0].message.content.trim();
              text = text.replace(/^["']|["']$/g, '');
 
@@ -957,8 +959,8 @@
         el('setting-funny-mode').checked = state.settings.funnyMode || false;
         el('setting-score-limit').value = state.settings.scoreToWin || 5;
         
-        el('setting-ai-temp').value = state.settings.aiTemperature || 1.0;
-        el('ai-temp-display').textContent = (state.settings.aiTemperature || 1.0).toFixed(1);
+        el('setting-ai-temp').value = state.settings.aiTemperature || 0.7;
+        el('ai-temp-display').textContent = (state.settings.aiTemperature || 0.7).toFixed(1);
         
         // Prevent overwriting the custom theme input while the host is typing
         if (document.activeElement !== el('setting-custom-theme')) {
