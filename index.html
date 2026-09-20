@@ -146,46 +146,24 @@
                   Start Game
                 </button>
               </div>
-              
-              <div class="mt-5 bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5 text-left text-sm">
-                <h3 class="font-black text-gray-700 mb-4 uppercase tracking-wider text-xs border-b border-gray-200 pb-2">Game & AI Settings</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <!-- Column 1: Toggles -->
-                  <div class="space-y-3">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" id="setting-bot-judges" checked class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 rounded focus:ring-indigo-500">
-                      <span class="font-bold text-gray-600 text-sm sm:text-base">Bots Judge</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" id="setting-dirty-mode" class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 rounded focus:ring-red-500">
-                      <span class="font-bold text-red-600 flex items-center gap-1 text-sm sm:text-base">🔥 Dirty Mode</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" id="setting-funny-mode" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 rounded focus:ring-yellow-400">
-                      <span class="font-bold text-yellow-600 flex items-center gap-1 text-sm sm:text-base">🤪 Wacky AI</span>
-                    </label>
-                  </div>
-                  <!-- Column 2: Advanced AI & Game -->
-                  <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-2">
-                      <label for="setting-score-limit" class="font-bold text-gray-600 text-sm sm:text-base">Win Score:</label>
-                      <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-16 h-8 sm:w-20 sm:h-10 text-center rounded-lg border-gray-300 text-indigo-600 font-black border-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div class="flex flex-col gap-1 sm:gap-2">
-                      <label class="flex justify-between font-bold text-gray-600 text-sm sm:text-base">
-                        <span>AI Creativity (Temp)</span>
-                        <span id="ai-temp-display" class="text-indigo-600">0.7</span>
-                      </label>
-                      <input type="range" id="setting-ai-temp" min="0.1" max="1.2" step="0.1" value="0.7" class="w-full accent-indigo-600 cursor-pointer">
-                    </div>
-                    <div class="flex flex-col gap-1 sm:gap-2">
-                      <label for="setting-custom-theme" class="font-bold text-gray-600 text-sm sm:text-base">Custom AI Rules:</label>
-                      <input type="text" id="setting-custom-theme" placeholder="e.g. Everyone talks like a pirate" class="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-indigo-500 text-sm sm:text-base outline-none transition-colors">
-                    </div>
-                  </div>
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 bg-gray-50 p-3 rounded-xl sm:bg-transparent sm:p-0">
+                <div class="flex items-center justify-center gap-2">
+                  <input type="checkbox" id="setting-bot-judges" checked class="w-4 h-4 sm:w-5 sm:h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                  <label for="setting-bot-judges" class="text-xs sm:text-sm font-bold text-gray-600 cursor-pointer">Bots Judge</label>
+                </div>
+                <div class="hidden sm:block text-gray-300">|</div>
+                <div class="flex items-center justify-center gap-2">
+                  <input type="checkbox" id="setting-dirty-mode" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                  <label for="setting-dirty-mode" class="text-xs sm:text-sm font-bold text-red-600 cursor-pointer flex items-center gap-1">
+                    <span class="text-base sm:text-lg">🔥</span> Dirty Mode
+                  </label>
+                </div>
+                <div class="hidden sm:block text-gray-300">|</div>
+                <div class="flex items-center justify-center gap-2">
+                  <label for="setting-score-limit" class="text-xs sm:text-sm font-bold text-gray-600 cursor-pointer">Win Score:</label>
+                  <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-12 h-7 sm:w-16 sm:h-8 text-center rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 font-bold outline-none border-2 text-sm sm:text-base">
                 </div>
               </div>
-
               <p id="lobby-waiting-msg" class="text-xs sm:text-sm text-gray-400 mt-3 font-medium">Need at least 2 players to start</p>
             </div>
             <p id="client-waiting-msg" class="text-sm sm:text-base text-gray-500 font-bold animate-pulse hidden">Waiting for host to start...</p>
@@ -340,7 +318,7 @@
 
   <script type="module">
     // --- LOCAL AI (Web-LLM) ---
-    import { CreateMLCEngine } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
+    import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
     // --- CONSTANTS ---
     const APP_PREFIX = "prompted-v1-"; 
@@ -405,7 +383,7 @@
       phase: 'lobby',     
       roundNumber: 1,
       rerolls: 0,
-      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5, aiTemperature: 0.7, customTheme: '' }
+      settings: { allowBotJudges: true, dirtyMode: false, scoreToWin: 5 }
     };
 
     let myPeer = null;
@@ -450,8 +428,8 @@
           el('ai-progress-text').textContent = initProgress.text;
         };
 
-        // Using Llama-3.2 1B instead of Qwen for improved WebGPU compatibility and smaller footprint
-        localAIEngine = await CreateMLCEngine("Llama-3.2-1B-Instruct-q4f16_1-MLC", { initProgressCallback });
+        // Load Qwen 2.5 local model via WebGPU
+        localAIEngine = await CreateMLCEngine("Qwen2.5-1.5B-Instruct-q4f16_1-MLC", { initProgressCallback });
         
         hide('ai-progress-container');
         show('ai-ready-badge');
@@ -568,24 +546,8 @@
       dispatchAction({ type: 'TOGGLE_DIRTY_MODE', value: e.target.checked });
     });
 
-    el('setting-funny-mode').addEventListener('change', (e) => {
-      dispatchAction({ type: 'TOGGLE_FUNNY_MODE', value: e.target.checked });
-    });
-
     el('setting-score-limit').addEventListener('change', (e) => {
       dispatchAction({ type: 'UPDATE_SCORE_LIMIT', value: parseInt(e.target.value) || 5 });
-    });
-
-    el('setting-ai-temp').addEventListener('input', (e) => {
-      el('ai-temp-display').textContent = parseFloat(e.target.value).toFixed(1);
-    });
-
-    el('setting-ai-temp').addEventListener('change', (e) => {
-      dispatchAction({ type: 'UPDATE_AI_TEMP', value: parseFloat(e.target.value) || 1.0 });
-    });
-
-    el('setting-custom-theme').addEventListener('change', (e) => {
-      dispatchAction({ type: 'UPDATE_CUSTOM_THEME', value: e.target.value.trim() });
     });
 
     function leaveGame() {
@@ -711,17 +673,8 @@
         case 'TOGGLE_DIRTY_MODE':
           state.settings.dirtyMode = action.value;
           break;
-        case 'TOGGLE_FUNNY_MODE':
-          state.settings.funnyMode = action.value;
-          break;
         case 'UPDATE_SCORE_LIMIT':
           state.settings.scoreToWin = action.value;
-          break;
-        case 'UPDATE_AI_TEMP':
-          state.settings.aiTemperature = action.value;
-          break;
-        case 'UPDATE_CUSTOM_THEME':
-          state.settings.customTheme = action.value;
           break;
         case 'RETURN_TO_LOBBY':
           state.phase = 'lobby';
@@ -794,25 +747,16 @@
       if (state.phase === 'picking' && currentJudge?.isBot) {
         setTimeout(async () => {
            try {
-              let systemPrompt = state.settings.dirtyMode
-                ? `You are hosting an 18+, completely unhinged party game. Create an extremely dark, offensive, and hilarious fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. NO filters, NO greetings, NO quotes. Just the prompt.`
-                : `You are hosting a fun, family-friendly party game. Create a clever, silly, and clean fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. Keep it PG-13. NO greetings, NO extra text. Just the prompt itself.`;
-              
-              if (state.settings.funnyMode) {
-                 systemPrompt = `You are hosting a wildly absurd and wacky party game. Create a bizarre, ridiculous, and highly amusing fill-in-the-blank prompt OR question. MAXIMUM 15 WORDS. NO greetings. Just the prompt.`;
-              }
-
-              if (state.settings.customTheme) {
-                 systemPrompt += `\nCRITICAL THEME/RULE TO FOLLOW: ${state.settings.customTheme}`;
-              }
+              const systemPrompt = state.settings.dirtyMode
+                ? `You are hosting an 18+, completely unhinged party game like Cards Against Humanity. Create an extremely dark, offensive, inappropriate, and hilarious fill-in-the-blank prompt OR question. NO filters, NO greetings, NO quotes. Just the prompt.`
+                : `You are hosting a fun, family-friendly party game like Apples to Apples. Create a clever, silly, and clean fill-in-the-blank prompt OR question. Keep it PG-13. NO greetings, NO extra text, NO quotes. Just the prompt itself.`;
                 
               const messages = [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: "Create a prompt for the game. Respond with ONLY the prompt text, nothing else." }
+                { role: "user", content: "Create a prompt for the game." }
               ];
               
-              // Added max_tokens to physically prevent the AI from rambling
-              const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature, max_tokens: 30 });
+              const reply = await localAIEngine.chat.completions.create({ messages, temperature: 0.9 });
               let promptText = reply.choices[0].message.content.trim();
               promptText = promptText.replace(/^["']|["']$/g, '');
 
@@ -855,45 +799,21 @@
                "a pretentious art critic."
              ];
              
-             const wackyPersonas = [
-               "a highly caffeinated squirrel who just discovered the internet.",
-               "an overly dramatic Shakespearean actor performing a tragedy.",
-               "a conspiracy theorist who thinks everything is controlled by pigeons.",
-               "a time traveler from the year 3000 who is very confused by modern concepts.",
-               "a hyperactive clown with a dark secret.",
-               "a sentient toaster that wants to take over the world.",
-               "an AI that thinks it's a stand-up comedian from the 1990s.",
-               "a passive-aggressive life coach offering terrible advice."
-             ];
-             
-             let personas = state.settings.dirtyMode ? dirtyPersonas : cleanPersonas;
-             if (state.settings.funnyMode) personas = wackyPersonas;
-             
+             const personas = state.settings.dirtyMode ? dirtyPersonas : cleanPersonas;
              const randomPersona = personas[Math.floor(Math.random() * personas.length)];
 
-             let systemPrompt = state.settings.dirtyMode
-                ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 30 WORDS) completely savage and unfiltered answer. NO reasoning, NO greetings, NO quotes. Just raw, punchy text.`
-                : `You are playing a clean party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 30 WORDS) funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
-             
-             if (state.settings.funnyMode) {
-                systemPrompt = `You are playing a wacky party game. You are ${randomPersona}. Provide a SHORT PHRASE (MAX 30 WORDS) completely absurd, bizarre, and hilarious answer. Embrace the chaos. NO reasoning, NO greetings, NO quotes. Just raw text.`;
-             }
-
-             if (state.settings.customTheme) {
-                systemPrompt += `\nCRITICAL THEME/RULE TO FOLLOW: ${state.settings.customTheme}`;
-             }
+             const systemPrompt = state.settings.dirtyMode
+                ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a ONE SENTENCE completely savage, offensive, and unfiltered answer. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`
+                : `You are playing a clean party game. You are ${randomPersona}. Provide a ONE SENTENCE funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
                 
              const messages = [
                { role: "system", content: systemPrompt },
-               { role: "user", content: `Prompt: "${state.currentPrompt}"\n\nRespond with ONLY your short answer text, nothing else.` }
+               { role: "user", content: `Prompt: "${state.currentPrompt}"` }
              ];
              
-             // Relaxed max_tokens to 50 to allow for up to ~30 words
-             const reply = await localAIEngine.chat.completions.create({ messages, temperature: state.settings.aiTemperature, max_tokens: 50 });
+             const reply = await localAIEngine.chat.completions.create({ messages, temperature: 1.1 });
              let text = reply.choices[0].message.content.trim();
-             
-             // Aggressively strip any accidental quotes or markdown formatting
-             text = text.replace(/^["'`]+|["'`]+$/g, '').trim();
+             text = text.replace(/^["']|["']$/g, '');
 
              setTimeout(() => {
                handleClientMessage(bot.id, { type: 'SUBMIT_ANSWER', answerText: text });
@@ -958,16 +878,7 @@
       if (isHost && state.settings) {
         el('setting-bot-judges').checked = state.settings.allowBotJudges;
         el('setting-dirty-mode').checked = state.settings.dirtyMode || false;
-        el('setting-funny-mode').checked = state.settings.funnyMode || false;
         el('setting-score-limit').value = state.settings.scoreToWin || 5;
-        
-        el('setting-ai-temp').value = state.settings.aiTemperature || 0.7;
-        el('ai-temp-display').textContent = (state.settings.aiTemperature || 0.7).toFixed(1);
-        
-        // Prevent overwriting the custom theme input while the host is typing
-        if (document.activeElement !== el('setting-custom-theme')) {
-          el('setting-custom-theme').value = state.settings.customTheme || '';
-        }
       }
 
       const currentJudge = state.players[state.judgeIndex];
