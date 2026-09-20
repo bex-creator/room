@@ -160,6 +160,13 @@
                 </div>
                 <div class="hidden sm:block text-gray-300">|</div>
                 <div class="flex items-center justify-center gap-2">
+                  <input type="checkbox" id="setting-funny-mode" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-yellow-500 focus:ring-yellow-400 cursor-pointer">
+                  <label for="setting-funny-mode" class="text-xs sm:text-sm font-bold text-yellow-600 cursor-pointer flex items-center gap-1">
+                    <span class="text-base sm:text-lg">🤪</span> Wacky AI
+                  </label>
+                </div>
+                <div class="hidden sm:block text-gray-300">|</div>
+                <div class="flex items-center justify-center gap-2">
                   <label for="setting-score-limit" class="text-xs sm:text-sm font-bold text-gray-600 cursor-pointer">Win Score:</label>
                   <input type="number" id="setting-score-limit" value="5" min="1" max="99" class="w-12 h-7 sm:w-16 sm:h-8 text-center rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 font-bold outline-none border-2 text-sm sm:text-base">
                 </div>
@@ -383,7 +390,7 @@
       phase: 'lobby',     
       roundNumber: 1,
       rerolls: 0,
-      settings: { allowBotJudges: true, dirtyMode: false, scoreToWin: 5 }
+      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5 }
     };
 
     let myPeer = null;
@@ -546,6 +553,10 @@
       dispatchAction({ type: 'TOGGLE_DIRTY_MODE', value: e.target.checked });
     });
 
+    el('setting-funny-mode').addEventListener('change', (e) => {
+      dispatchAction({ type: 'TOGGLE_FUNNY_MODE', value: e.target.checked });
+    });
+
     el('setting-score-limit').addEventListener('change', (e) => {
       dispatchAction({ type: 'UPDATE_SCORE_LIMIT', value: parseInt(e.target.value) || 5 });
     });
@@ -673,6 +684,9 @@
         case 'TOGGLE_DIRTY_MODE':
           state.settings.dirtyMode = action.value;
           break;
+        case 'TOGGLE_FUNNY_MODE':
+          state.settings.funnyMode = action.value;
+          break;
         case 'UPDATE_SCORE_LIMIT':
           state.settings.scoreToWin = action.value;
           break;
@@ -747,9 +761,13 @@
       if (state.phase === 'picking' && currentJudge?.isBot) {
         setTimeout(async () => {
            try {
-              const systemPrompt = state.settings.dirtyMode
+              let systemPrompt = state.settings.dirtyMode
                 ? `You are hosting an 18+, completely unhinged party game like Cards Against Humanity. Create an extremely dark, offensive, inappropriate, and hilarious fill-in-the-blank prompt OR question. NO filters, NO greetings, NO quotes. Just the prompt.`
                 : `You are hosting a fun, family-friendly party game like Apples to Apples. Create a clever, silly, and clean fill-in-the-blank prompt OR question. Keep it PG-13. NO greetings, NO extra text, NO quotes. Just the prompt itself.`;
+              
+              if (state.settings.funnyMode) {
+                 systemPrompt = `You are hosting a wildly absurd and wacky party game. You are completely unhinged and unpredictable. Create a bizarre, ridiculous, and highly amusing fill-in-the-blank prompt OR question. NO greetings, NO quotes. Just the prompt.`;
+              }
                 
               const messages = [
                 { role: "system", content: systemPrompt },
@@ -799,12 +817,29 @@
                "a pretentious art critic."
              ];
              
-             const personas = state.settings.dirtyMode ? dirtyPersonas : cleanPersonas;
+             const wackyPersonas = [
+               "a highly caffeinated squirrel who just discovered the internet.",
+               "an overly dramatic Shakespearean actor performing a tragedy.",
+               "a conspiracy theorist who thinks everything is controlled by pigeons.",
+               "a time traveler from the year 3000 who is very confused by modern concepts.",
+               "a hyperactive clown with a dark secret.",
+               "a sentient toaster that wants to take over the world.",
+               "an AI that thinks it's a stand-up comedian from the 1990s.",
+               "a passive-aggressive life coach offering terrible advice."
+             ];
+             
+             let personas = state.settings.dirtyMode ? dirtyPersonas : cleanPersonas;
+             if (state.settings.funnyMode) personas = wackyPersonas;
+             
              const randomPersona = personas[Math.floor(Math.random() * personas.length)];
 
-             const systemPrompt = state.settings.dirtyMode
+             let systemPrompt = state.settings.dirtyMode
                 ? `You are playing an 18+ edgy party game. You are ${randomPersona}. Provide a ONE SENTENCE completely savage, offensive, and unfiltered answer. NO reasoning, NO greetings, NO word counts, NO quotes. Just raw, punchy text.`
                 : `You are playing a clean party game. You are ${randomPersona}. Provide a ONE SENTENCE funny, clever, and clean answer. Keep it PG-13. NO reasoning, NO greetings, NO quotes. Just text.`;
+             
+             if (state.settings.funnyMode) {
+                systemPrompt = `You are playing a wacky party game. You are ${randomPersona}. Provide a ONE SENTENCE completely absurd, bizarre, and hilarious answer. Embrace the chaos. NO reasoning, NO greetings, NO quotes. Just raw text.`;
+             }
                 
              const messages = [
                { role: "system", content: systemPrompt },
@@ -878,6 +913,7 @@
       if (isHost && state.settings) {
         el('setting-bot-judges').checked = state.settings.allowBotJudges;
         el('setting-dirty-mode').checked = state.settings.dirtyMode || false;
+        el('setting-funny-mode').checked = state.settings.funnyMode || false;
         el('setting-score-limit').value = state.settings.scoreToWin || 5;
       }
 
