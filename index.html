@@ -174,9 +174,9 @@
                     <div class="flex flex-col gap-1 sm:gap-2">
                       <label class="flex justify-between font-bold text-gray-600 text-sm sm:text-base">
                         <span>AI Creativity (Temp)</span>
-                        <span id="ai-temp-display" class="text-indigo-600">1.1</span>
+                        <span id="ai-temp-display" class="text-indigo-600">1.0</span>
                       </label>
-                      <input type="range" id="setting-ai-temp" min="0.1" max="2.0" step="0.1" value="1.1" class="w-full accent-indigo-600 cursor-pointer">
+                      <input type="range" id="setting-ai-temp" min="0.1" max="1.5" step="0.1" value="1.0" class="w-full accent-indigo-600 cursor-pointer">
                     </div>
                     <div class="flex flex-col gap-1 sm:gap-2">
                       <label for="setting-custom-theme" class="font-bold text-gray-600 text-sm sm:text-base">Custom AI Rules:</label>
@@ -340,7 +340,7 @@
 
   <script type="module">
     // --- LOCAL AI (Web-LLM) ---
-    import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+    import { CreateMLCEngine } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
 
     // --- CONSTANTS ---
     const APP_PREFIX = "prompted-v1-"; 
@@ -405,7 +405,7 @@
       phase: 'lobby',     
       roundNumber: 1,
       rerolls: 0,
-      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5, aiTemperature: 1.1, customTheme: '' }
+      settings: { allowBotJudges: true, dirtyMode: false, funnyMode: false, scoreToWin: 5, aiTemperature: 1.0, customTheme: '' }
     };
 
     let myPeer = null;
@@ -450,8 +450,8 @@
           el('ai-progress-text').textContent = initProgress.text;
         };
 
-        // Load Qwen 2.5 local model via WebGPU
-        localAIEngine = await CreateMLCEngine("Qwen2.5-1.5B-Instruct-q4f16_1-MLC", { initProgressCallback });
+        // Using Llama-3.2 1B instead of Qwen for improved WebGPU compatibility and smaller footprint
+        localAIEngine = await CreateMLCEngine("Llama-3.2-1B-Instruct-q4f16_1-MLC", { initProgressCallback });
         
         hide('ai-progress-container');
         show('ai-ready-badge');
@@ -581,7 +581,7 @@
     });
 
     el('setting-ai-temp').addEventListener('change', (e) => {
-      dispatchAction({ type: 'UPDATE_AI_TEMP', value: parseFloat(e.target.value) || 1.1 });
+      dispatchAction({ type: 'UPDATE_AI_TEMP', value: parseFloat(e.target.value) || 1.0 });
     });
 
     el('setting-custom-theme').addEventListener('change', (e) => {
@@ -957,8 +957,8 @@
         el('setting-funny-mode').checked = state.settings.funnyMode || false;
         el('setting-score-limit').value = state.settings.scoreToWin || 5;
         
-        el('setting-ai-temp').value = state.settings.aiTemperature || 1.1;
-        el('ai-temp-display').textContent = (state.settings.aiTemperature || 1.1).toFixed(1);
+        el('setting-ai-temp').value = state.settings.aiTemperature || 1.0;
+        el('ai-temp-display').textContent = (state.settings.aiTemperature || 1.0).toFixed(1);
         
         // Prevent overwriting the custom theme input while the host is typing
         if (document.activeElement !== el('setting-custom-theme')) {
